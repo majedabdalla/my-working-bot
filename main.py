@@ -2,7 +2,8 @@
 Modified main.py with improved error handling and data validation
 for MultiLangTranslator Bot
 """
-
+import requests
+import traceback
 import os
 import json
 import logging
@@ -11,7 +12,7 @@ from telegram import Update, Bot
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler,
                           CallbackContext)
-
+import importlib
 # Import configuration
 import config
 
@@ -32,6 +33,52 @@ from handlers.menu_handlers import register_menu_handlers, menu_command, handle_
 # Import web server for keep-alive
 from keep_alive import start_server
 
+
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "your-fallback-key")
+DEEPSEEK_URL = "https://openrouter.ai/api/v1/chat/completions"
+
+def get_deepseek_fix(error_message, code_snippet):
+    """Get code fix from DeepSeek-R1 API"""
+    prompt = f"""
+    Fix this Telegram bot error in Python code:
+    {error_message}
+    
+    Current code snippet:
+    ```python
+    {code_snippet}
+    ```
+    
+    Return ONLY the fixed code block with no explanations.
+    """
+    
+    headers = {
+        "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    
+    payload = {
+        "model": "deepseek/deepseek-r1:free",
+        "messages": [{"role": "user", "content": prompt}]
+    }
+    
+    try:
+        response = requests.post(DEEPSEEK_URL, json=payload, headers=headers, timeout=30)
+        response.raise_for_status()
+        return response.json()["choices"][0]["message"]["content"]
+    except Exception as e:
+        logger.error(f"DeepSeek API error: {str(e)}")
+        return None
+
+def apply_code_fix(file_path, fixed_code):
+    """Apply fixed code to file"""
+    try:
+        with open(file_path, "w") as f:
+            f.write(fixed_code)
+        logger.info(f"Applied fix to {file_path}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to apply fix: {str(e)}")
+        return False
 # Configure logging
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -120,6 +167,8 @@ def main() -> None:
         # Register menu handlers (now includes handler registration internally)
         register_menu_handlers(dispatcher)
         from telegram.ext import MessageHandler, Filters
+      dispatcher.add_handler(CommandHandler("fixcode", fix_code_command))
+
 
         # Register callback query handler for premium toggle
         dispatcher.add_handler(CallbackQueryHandler(toggle_premium_callback, pattern="^toggle_premium_"))
@@ -132,6 +181,7 @@ def main() -> None:
 
         # Log that the bot has started
         logger.info("Bot started. Press Ctrl+C to stop.")
+      
 
         # Keep the main thread running so the bot doesn't stop
         # We use threading event instead of just updater.idle() because we need to return control to Flask
@@ -145,40 +195,92 @@ def main() -> None:
 
 
 def error_handler(update, context):
-    """Handle errors in the dispatcher."""
-    logger.error(f"Update {update} caused error: {context.error}",
-                 exc_info=True)
-
+    """Handle errors with DeepSeek auto-fix"""
+    error = context.error
+    tb = traceback.format_exc()
+    
+    logger.error(f"Update {update} caused error: {error}\n{tb}", exc_info=True)
+    
+    # Get current code
+    current_file = os.path.abspath(__file__)
+    with open(current_file, "r") as f:
+        current_code = f.read()
+    
+    # Get fix from DeepSeek
+    fixed_code = get_deepseek_fix(f"{error}\n\n{tb}", current_code)
+    
+    if fixed_code:
+        # Apply fix and restart
+        if apply_code_fix(current_file, fixed_code):
+            # Notify admin
+            if context.bot_data and "admin_ids" in context.bot_data:
+                for admin_id in context.bot_data["admin_ids"]:
+                    try:
+                        context.bot.send_message(
+                            admin_id,
+                            f"🛠️ Applied auto-fix for error:\n{error}\nRestarting bot..."
+                        )
+                    except:
+                        pass
+            
+            # Graceful restart
+            threading.Thread(target=restart_bot).start()
+            return
+    
+    # Fallback to original error handling
     try:
-        # Send message to admin
         if context.bot_data and "admin_ids" in context.bot_data:
             admin_ids = context.bot_data["admin_ids"]
             for admin_id in admin_ids:
                 try:
                     context.bot.send_message(
                         chat_id=admin_id,
-                        text=
-                        f"⚠️ Bot Error:\n{context.error}\n\nUpdate: {update}")
+                        text=f"⚠️ Bot Error:\n{error}\n\nTraceback:\n{tb}"
+                    )
                 except Exception as e:
                     logger.error(f"Failed to notify admin {admin_id}: {e}")
-
-        # If the error is in a user conversation, notify the user
-        if update and update.effective_user:
-            try:
-                update.effective_message.reply_text(
-                    "Sorry, an error occurred. The admin has been notified.")
-            except Exception as e:
-                logger.error(f"Failed to notify user about error: {e}")
-
     except Exception as e:
         logger.error(f"Error in error handler: {e}", exc_info=True)
 
+def restart_bot():
+    """Restart the bot process"""
+    logger.info("Restarting bot after fix...")
+    os.kill(os.getpid(), 9)  # Force restart
 
 # Global variable to store the bot thread and stop event
 bot_thread = None
 bot_stop_event = None
 
-
+def fix_code_command(update: Update, context: CallbackContext) -> None:
+    """Manually trigger code fixing"""
+    if str(update.effective_user.id) not in context.bot_data["admin_ids"]:
+        update.message.reply_text("❌ Admin only command")
+        return
+    
+    update.message.reply_text("🔄 Analyzing code for improvements...")
+    
+    current_file = os.path.abspath(__file__)
+    with open(current_file, "r") as f:
+        current_code = f.read()
+    
+    prompt = """
+    Review this Telegram bot code and improve it:
+    - Fix any bugs or potential issues
+    - Optimize performance
+    - Add proper error handling
+    - Follow PEP8 guidelines
+    
+    Return ONLY the improved code block.
+    """
+    
+    fixed_code = get_deepseek_fix(prompt, current_code)
+    
+    if fixed_code and apply_code_fix(current_file, fixed_code):
+        update.message.reply_text("✅ Code improved! Restarting bot...")
+        threading.Thread(target=restart_bot).start()
+    else:
+        update.message.reply_text("❌ Failed to improve code")
+      
 def start_bot_in_thread():
     """Start the bot in a separate thread and ensure it stays running."""
     global bot_thread, bot_stop_event
