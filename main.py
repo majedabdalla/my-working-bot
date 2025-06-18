@@ -33,6 +33,11 @@ from handlers.menu_handlers import register_menu_handlers
 # Fix: Import missing callback handler
 from handlers.admin_handlers import toggle_premium_callback
 
+# Workaround for Python 3.13 compatibility
+try:
+    import imghdr
+except ImportError:
+    import mimetypes as imghdr  # Fallback for Python 3.13+
 # Configure logging FIRST to capture all logs
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
