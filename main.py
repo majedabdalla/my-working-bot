@@ -35,9 +35,12 @@ from handlers.admin_handlers import toggle_premium_callback
 
 # Workaround for Python 3.13 compatibility
 try:
-    # Use PIL/Pillow for image type detection
-from PIL import Image
-
+    import imghdr
+    from PIL import Image
+except ImportError as e:
+    logger.error(f"Import error: {e}")
+    # Consider exiting if these are critical imports
+    # sys.exit(1)
 def get_image_type(file_path):
     try:
         with Image.open(file_path) as img:
