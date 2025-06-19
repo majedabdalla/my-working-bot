@@ -805,7 +805,7 @@ def perform_random_search(update: Update, context: CallbackContext) -> int:
 def register_search_handlers(dispatcher):
     # ⬅️ زر القائمة: بحث عن شريك
     search_menu_handler = MessageHandler(
-        filters.regex(r"^(بحث عن شريك|Search Partner 🔍|Cari Pasangan|साथी खोजें)$"),
+        filters.Regex(r"^(بحث عن شريك|Search Partner 🔍|Cari Pasangan|साथी खोजें)$"),
         start_partner_search
     )
 
@@ -833,7 +833,7 @@ def register_search_handlers(dispatcher):
             ],
         },
         fallbacks=[
-            MessageHandler(filters.regex(r"^⬅️ "), handle_menu_selection),
+            MessageHandler(filters.Regex(r"^⬅️ "), handle_menu_selection),
             CommandHandler("cancel", lambda u, c: ConversationHandler.END)
         ],
         name="partner_search_conversation",
