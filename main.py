@@ -9,9 +9,9 @@ import json
 import logging
 import threading
 from telegram import Update
-from telegram.ext import (Updater, CommandHandler, MessageHandler, filters,
+from telegram.ext import (Updater, CommandHandler, MessageHandler,
                           ConversationHandler, CallbackQueryHandler,
-                          CallbackContext)
+                          CallbackContext, filters)  # Move filters to the end
 
 # Import configuration
 import config
@@ -204,7 +204,9 @@ def main() -> None:
         logger.info("Bot started. Press Ctrl+C to stop.")
 
         # Use updater.idle() for proper shutdown handling
-        updater.idle()
+updater.start_polling(drop_pending_updates=True)
+logger.info("Bot started. Press Ctrl+C to stop.")
+updater.idle()  # Keep this line too
 
     except Exception as e:
         logger.error(f"Error starting bot: {e}", exc_info=True)
