@@ -13,6 +13,7 @@ from typing import Dict, List, Any, Optional
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 from telegram.ext import CallbackContext, ConversationHandler
 from telegram.ext import MessageHandler, filters
+from telegram.constants import ParseMode, MessageEntity
 import config
 from handlers.menu_handlers import handle_menu_selection
 from core.session import set_chat_partner, get_chat_partner
