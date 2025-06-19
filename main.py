@@ -34,7 +34,7 @@ try:
 
 except ImportError as e:
     # Fallback for Python 3.13+
-    import mimetypes as imghdr
+    import mimetypes
     logger.error(f"Image processing imports failed: {e}")
     
     # Fallback function definition
