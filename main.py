@@ -144,7 +144,6 @@ def setup_data_directories():
 def main() -> None:
     """Start the bot."""
     logger.info("Starting bot...")
-
     try:
         setup_data_directories()
 
