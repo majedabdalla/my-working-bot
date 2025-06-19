@@ -13,7 +13,8 @@ import logging
 import threading
 import time
 from typing import Dict, List, Any, Optional, Callable
-from telegram import Bot, ParseMode
+from telegram import Bot
+from telegram.constants import ParseMode 
 from telegram.error import TelegramError
 
 # Initialize logger
