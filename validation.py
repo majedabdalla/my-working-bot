@@ -11,7 +11,7 @@ import json
 from typing import Dict, List, Any, Optional
 from telegram import Update, Bot, ParseMode
 from telegram.ext import CallbackContext
-
+from telegram.constants import ParseMode, MessageEntity
 # Import core modules
 from core.session import get_session_manager
 from core.database import get_database_manager
