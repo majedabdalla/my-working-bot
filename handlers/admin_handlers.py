@@ -12,9 +12,9 @@ This module provides admin dashboard functionality including:
 import logging
 import time
 from typing import Dict, List, Any, Optional, Union
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, MessageEntity
 from telegram.ext import CallbackContext, CommandHandler, CallbackQueryHandler
-from telegram.constants import ParseMode, MessageEntity
+from telegram.constants import ParseMode
 # Import core modules
 from core.session import require_profile
 from core.database import get_database_manager
