@@ -190,5 +190,5 @@ def register_menu_handlers(dispatcher):
 
     # Menu selection handler
     # This should be added after all other handlers to avoid conflicts
-    menu_handler = MessageHandler(filters.text & ~filters.command,
+    menu_handler = MessageHandler(filters.TEXT & ~filters.COMMAND,
                                   handle_menu_selection)
