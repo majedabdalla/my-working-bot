@@ -911,7 +911,7 @@ def register_user_handlers(dispatcher):
                                country_selection)
             ],
         },
-        fallbacks=[MessageHandler(filters.regex(r"^⬅️ "), go_back_to_menu)],
+        fallbacks=[MessageHandler(filters.Regex(r"^⬅️ "), go_back_to_menu)],
         name="profile_conversation",
         persistent=False)
     dispatcher.add_handler(profile_conv_handler)
@@ -919,7 +919,7 @@ def register_user_handlers(dispatcher):
     # ✅ Conversations: تحديث الحقول (لغة، جنس، منطقة، بلد)
     language_conv = ConversationHandler(entry_points=[
         MessageHandler(
-            filters.regex(
+            filters.Regex(
                 r"^(تحديث اللغة|Update Language|Ubah Bahasa|भाषा अपडेट करें)$"
             ), start_update_language)
     ],
