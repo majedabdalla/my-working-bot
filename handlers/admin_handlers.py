@@ -14,7 +14,7 @@ import time
 from typing import Dict, List, Any, Optional, Union
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 from telegram.ext import CallbackContext, CommandHandler, CallbackQueryHandler
-
+from telegram.constants import ParseMode, MessageEntity
 # Import core modules
 from core.session import require_profile
 from core.database import get_database_manager
