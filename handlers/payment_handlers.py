@@ -213,7 +213,7 @@ def register_payment_handlers(dispatcher):
         entry_points=[CallbackQueryHandler(payment_verification_callback, pattern="^verify_payment$")],
         states={
             dispatcher.bot_data.get("PAYMENT_PROOF", 8): [
-                MessageHandler(filters.all & ~filters.COMMAND, handle_payment_proof)
+                MessageHandler(filters.ALL & ~filters.COMMAND, handle_payment_proof)
             ],
         },
         fallbacks=[CommandHandler("cancel", lambda u, c: ConversationHandler.END)],
