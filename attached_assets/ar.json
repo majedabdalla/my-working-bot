@@ -20,7 +20,7 @@
   "feature_activated": "تم تفعيل ميزة البحث المتقدم عن شريك لحسابك!",
   "search_partner_prompt_language": "يرجى اختيار لغة الشريك:",
   "search_partner_prompt_gender": "ما هو جنس الشريك الذي تبحث عنه؟",
-  "search_partner_prompt_country": "ما هو بلد الشريك الذي تبحث عنه؟ (اكتب اسم المنطقة أولاً، أو \\\\\'أي بلد\\\\\')",
+  "search_partner_prompt_country": "ما هو بلد الشريك الذي تبحث عنه؟ (اكتب اسم المنطقة أولاً، أو 'أي بلد')",
   "search_results_none": "لم يتم العثور على شركاء متاحين حالياً.",
   "search_results_found": "تم العثور على {count} شريك محتمل:",
   "admin_user_blocked": "تم حظر المستخدم {user_id}.",
