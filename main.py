@@ -203,9 +203,9 @@ def main() -> None:
         logger.info("Bot started. Press Ctrl+C to stop.")
 
         # Use updater.idle() for proper shutdown handling
-updater.start_polling(drop_pending_updates=True)
-logger.info("Bot started. Press Ctrl+C to stop.")
-updater.idle()  # Keep this line too
+        updater.start_polling(drop_pending_updates=True)
+        logger.info("Bot started. Press Ctrl+C to stop.")
+        updater.idle()  # Keep this line too
 
     except Exception as e:
         logger.error(f"Error starting bot: {e}", exc_info=True)
