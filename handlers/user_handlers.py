@@ -13,7 +13,7 @@ import logging
 import json
 import os
 from typing import Dict, List, Any, Optional, Union
-from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup, MessageEntity
 from telegram.constants import ParseMode  # Correct import pathfrom handlers.menu_handlers import create_main_keyboard
 from localization import get_text
 from telegram.ext import CallbackContext, MessageHandler, filters
@@ -25,7 +25,7 @@ from core.notifications import get_notification_manager
 from core.security import get_spam_protection
 from core.session import get_session_manager
 from core.session import get_chat_partner, clear_chat_partner
-
+from telegram.constants import ParseMode
 # Import core modules
 from core.session import get_session_manager, require_profile, require_premium
 from core.database import get_database_manager
@@ -34,7 +34,7 @@ from core.notifications import get_notification_manager
 from localization import get_text
 from core.session import get_chat_partner, clear_chat_partner
 from handlers.menu_handlers import (menu_command, create_main_keyboard, handle_menu_selection,)
-from telegram.constants import ParseMode, MessageEntity
+
 # Initialize logger
 logger = logging.getLogger(__name__)
 
