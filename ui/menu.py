@@ -10,7 +10,7 @@ import logging
 from typing import Dict, List, Any, Optional
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, ParseMode
 from telegram.ext import CallbackContext
-
+from telegram.constants import ParseMode, MessageEntity
 # Import core modules
 from core.session import require_profile
 from core.database import get_database_manager
