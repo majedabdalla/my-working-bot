@@ -180,7 +180,7 @@ def show_premium_features(update: Update, context: CallbackContext) -> None:
 # Register handlers
 def register_menu_handlers(dispatcher):
     """Register all menu handlers with the dispatcher."""
-    from telegram.ext import CommandHandler, MessageHandler, Filters
+    from telegram.ext import CommandHandler, MessageHandler, filters
 
     # Menu command
     dispatcher.add_handler(CommandHandler("menu", menu_command))
@@ -190,5 +190,5 @@ def register_menu_handlers(dispatcher):
 
     # Menu selection handler
     # This should be added after all other handlers to avoid conflicts
-    menu_handler = MessageHandler(Filters.text & ~Filters.command,
+    menu_handler = MessageHandler(filters.text & ~filters.command,
                                   handle_menu_selection)
