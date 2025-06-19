@@ -9,9 +9,9 @@ import json
 import logging
 import threading
 from telegram import Update
-from telegram.ext import (Updater, CommandHandler, MessageHandler,
+from telegram.ext import (ApplicationBuilder, CommandHandler, MessageHandler,
                           ConversationHandler, CallbackQueryHandler,
-                          CallbackContext, filters)  # Move filters to the end
+                          ContextTypes, filters)
 import sys  # Add this with other imports
 # Import configuration
 import config
@@ -121,7 +121,7 @@ def restart_bot():
     logger.info("Restarting bot after fix...")
     os.kill(os.getpid(), 9)  # Force restart
 
-def fix_code_command(update: Update, context: CallbackContext) -> None:
+async def fix_code_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Manually trigger code fixing"""
     if str(update.effective_user.id) not in context.bot_data.get("admin_ids", []):
         update.message.reply_text("❌ Admin only command")
@@ -168,8 +168,8 @@ def main() -> None:
     try:
         setup_data_directories()
 
-        updater = Updater(config.BOT_TOKEN)
-        dispatcher = updater.dispatcher
+        application = ApplicationBuilder().token(config.BOT_TOKEN).build()
+        dispatcher = application
 
         # Initialize bot data
         dispatcher.bot_data.update({
@@ -201,7 +201,7 @@ def main() -> None:
         init_session_manager("data/sessions.json")
         init_database_manager(config.USER_DATA_FILE, config.PENDING_PAYMENTS_FILE)
         init_spam_protection()
-        init_notification_manager(updater.bot, dispatcher.bot_data["admin_ids"])
+        init_notification_manager(application.bot, dispatcher.bot_data["admin_ids"])
 
         # Register handlers
         register_user_handlers(dispatcher)
@@ -219,20 +219,15 @@ def main() -> None:
             pattern="^toggle_premium_"
         ))
 
-        dispatcher.add_error_handler(error_handler)
-        updater.start_polling()
+        application.add_error_handler(error_handler)
         logger.info("Bot started. Press Ctrl+C to stop.")
-
-        # Use updater.idle() for proper shutdown handling
-        updater.start_polling(drop_pending_updates=True)
-        logger.info("Bot started. Press Ctrl+C to stop.")
-        updater.idle()  # Keep this line too
+        application.run_polling(drop_pending_updates=True)
 
     except Exception as e:
         logger.error(f"Error starting bot: {e}", exc_info=True)
         raise
 
-def error_handler(update, context):
+async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle errors with DeepSeek auto-fix"""
     error = context.error
     tb = traceback.format_exc()
@@ -252,7 +247,7 @@ def error_handler(update, context):
             if context.bot_data.get("admin_ids"):
                 for admin_id in context.bot_data["admin_ids"]:
                     try:
-                        context.bot.send_message(
+                        await context.bot.send_message(
                             admin_id,
                             f"🛠️ Applied auto-fix for error:\n{error}\nRestarting bot..."
                         )
@@ -267,7 +262,7 @@ def error_handler(update, context):
         if context.bot_data.get("admin_ids"):
             for admin_id in context.bot_data["admin_ids"]:
                 try:
-                    context.bot.send_message(
+                    await context.bot.send_message(
                         admin_id,
                         text=f"⚠️ Bot Error:\n{error}\n\nTraceback:\n{tb}"
                     )
