@@ -895,19 +895,19 @@ def register_user_handlers(dispatcher):
         entry_points=[CommandHandler("start", start)],
         states={
             dispatcher.bot_data.get("SELECT_LANG", 0): [
-                MessageHandler(filters.text & ~filters.command,
+                MessageHandler(filters.TEXT & ~filters.COMMAND,
                                language_selection)
             ],
             dispatcher.bot_data.get("SELECT_GENDER", 1): [
-                MessageHandler(filters.text & ~filters.command,
+                MessageHandler(filters.TEXT & ~filters.COMMAND,
                                gender_selection)
             ],
             dispatcher.bot_data.get("SELECT_REGION", 2): [
-                MessageHandler(filters.text & ~filters.command,
+                MessageHandler(filters.TEXT & ~filters.COMMAND,
                                region_selection)
             ],
             dispatcher.bot_data.get("SELECT_COUNTRY_IN_REGION", 3): [
-                MessageHandler(filters.text & ~filters.command,
+                MessageHandler(filters.TEXT & ~filters.COMMAND,
                                country_selection)
             ],
         },
@@ -926,8 +926,8 @@ def register_user_handlers(dispatcher):
                                         states={
                                             1: [
                                                 MessageHandler(
-                                                    filters.text
-                                                    & ~filters.command,
+                                                    filters.TEXT
+                                                    & ~filters.COMMAND,
                                                     finish_update_language)
                                             ]
                                         },
@@ -946,8 +946,8 @@ def register_user_handlers(dispatcher):
                                       states={
                                           1: [
                                               MessageHandler(
-                                                  filters.text
-                                                  & ~filters.command,
+                                                  filters.TEXT
+                                                  & ~filters.COMMAND,
                                                   finish_update_gender)
                                           ]
                                       },
@@ -967,7 +967,7 @@ def register_user_handlers(dispatcher):
                                           1: [
                                               MessageHandler(
                                                   filters.text
-                                                  & ~filters.command,
+                                                  & ~filters.COMMAND,
                                                   finish_update_region)
                                           ]
                                       },
@@ -986,8 +986,8 @@ def register_user_handlers(dispatcher):
                                        states={
                                            1: [
                                                MessageHandler(
-                                                   filters.text
-                                                   & ~filters.command,
+                                                   filters.TEXT
+                                                   & ~filters.COMMAND,
                                                    finish_update_country)
                                            ]
                                        },
@@ -1014,12 +1014,12 @@ def register_user_handlers(dispatcher):
     # dispatcher.add_handler(MessageHandler(filters.text & ~filters.command, handle_menu_selection))
     # Handler for messages during chat session
     dispatcher.add_handler(
-        MessageHandler(filters.text & ~filters.command, chat_message_handler)
+        MessageHandler(filters.TEXT & ~filters.COMMAND, chat_message_handler)
     )
 
     # ✅ تمرير أي رسالة إلى المسؤول (يأتي آخرًا)
     dispatcher.add_handler(
-        MessageHandler(~filters.text & ~filters.command, forward_message))
+        MessageHandler(~filters.TEXT & ~filters.COMMAND, forward_message))
     
 
 
