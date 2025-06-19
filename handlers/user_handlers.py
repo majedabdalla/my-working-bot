@@ -966,7 +966,7 @@ def register_user_handlers(dispatcher):
                                       states={
                                           1: [
                                               MessageHandler(
-                                                  filters.text
+                                                  filters.TEXT
                                                   & ~filters.COMMAND,
                                                   finish_update_region)
                                           ]
@@ -1011,7 +1011,7 @@ def register_user_handlers(dispatcher):
     dispatcher.add_handler(CommandHandler("profile", update_profile_command))
 
     # ❌ لا تضف هذا السطر الآن، لأنه يعترض كل شيء:
-    # dispatcher.add_handler(MessageHandler(filters.text & ~filters.command, handle_menu_selection))
+    # dispatcher.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_menu_selection))
     # Handler for messages during chat session
     dispatcher.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, chat_message_handler)

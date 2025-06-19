@@ -160,7 +160,7 @@ def register_menu_handlers(dispatcher):
     # Menu selection handler
     # This should be added after all other handlers to avoid conflicts
     menu_handler = MessageHandler(
-        filters.text & ~filters.command & filters.Regex(r'^(.*menu_.*|.*settings|.*profile|.*search|.*payment|.*help)$'),
+        filters.TEXT & ~filters.COMMAND & filters.Regex(r'^(.*menu_.*|.*settings|.*profile|.*search|.*payment|.*help)$'),
         handle_menu_selection
     )
     
