@@ -33,25 +33,32 @@ from handlers.menu_handlers import register_menu_handlers
 # Fix: Import missing callback handler
 from handlers.admin_handlers import toggle_premium_callback
 
-# Workaround for Python 3.13 compatibility
+# Workaround for Python 3.13 compatibility# Workaround for Python 3.13 compatibility
 try:
     import imghdr
     from PIL import Image
+    
+    # Define the function INSIDE the try block
+    def get_image_type(file_path):
+        try:
+            with Image.open(file_path) as img:
+                return img.format
+        except Exception:
+            return None
+
 except ImportError as e:
-    logger.error(f"Import error: {e}")
-    # Consider exiting if these are critical imports
-    # sys.exit(1)
-def get_image_type(file_path):
-    try:
-        with Image.open(file_path) as img:
-            return img.format
-    except:
-        return None
-except ImportError as e:
-    logger.error(f"Critical import error: {e}")
-    # Consider exiting if this is a critical dependency
-    sys.exit(1)
-    import mimetypes as imghdr  # Fallback for Python 3.13+
+    # Fallback for Python 3.13+
+    import mimetypes as imghdr
+    logger.error(f"Image processing imports failed: {e}")
+    
+    # Fallback function definition
+    def get_image_type(file_path):
+        try:
+            # Fallback using mimetypes
+            mime, _ = mimetypes.guess_type(file_path)
+            return mime.split('/')[-1].upper() if mime else None
+        except Exception:
+            return None
 # Configure logging FIRST to capture all logs
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
