@@ -14,9 +14,8 @@ import threading
 import time
 from typing import Dict, List, Any, Optional, Callable
 from telegram import Bot
-from telegram.constants import ParseMode 
 from telegram.error import TelegramError
-
+from telegram.constants import ParseMode, MessageEntity
 # Initialize logger
 logger = logging.getLogger(__name__)
 
