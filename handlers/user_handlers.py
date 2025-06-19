@@ -939,7 +939,7 @@ def register_user_handlers(dispatcher):
 
     gender_conv = ConversationHandler(entry_points=[
         MessageHandler(
-            filters.regex(
+            filters.Regex(
                 r"^(تحديث الجنس|Update Gender|Perbarui Jenis Kelamin|लिंग अपडेट करें)$"
             ), start_update_gender)
     ],
@@ -953,13 +953,13 @@ def register_user_handlers(dispatcher):
                                       },
                                       fallbacks=[
                                           MessageHandler(
-                                              filters.regex(r"^⬅️ "),
+                                              filters.Regex(r"^⬅️ "),
                                               go_back_to_menu)
                                       ])
 
     region_conv = ConversationHandler(entry_points=[
         MessageHandler(
-            filters.regex(
+            filters.Regex(
                 r"^(تحديث المنطقة|Update Region|Perbarui Wilayah|क्षेत्र अपडेट करें)$"
             ), start_update_region)
     ],
@@ -973,13 +973,13 @@ def register_user_handlers(dispatcher):
                                       },
                                       fallbacks=[
                                           MessageHandler(
-                                              filters.regex(r"^⬅️ "),
+                                              filters.Regex(r"^⬅️ "),
                                               go_back_to_menu)
                                       ])
 
     country_conv = ConversationHandler(entry_points=[
         MessageHandler(
-            filters.regex(
+            filters.Regex(
                 r"^(تحديث البلد|Update Country|Perbarui Negara|देश अपडेट करें)$"
             ), start_update_country)
     ],
@@ -993,7 +993,7 @@ def register_user_handlers(dispatcher):
                                        },
                                        fallbacks=[
                                            MessageHandler(
-                                               filters.regex(r"^⬅️ "),
+                                               filters.Regex(r"^⬅️ "),
                                                go_back_to_menu)
                                        ])
 
