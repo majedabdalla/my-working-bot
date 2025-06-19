@@ -16,7 +16,7 @@ from typing import Dict, List, Any, Optional, Union
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 from handlers.menu_handlers import create_main_keyboard
 from localization import get_text
-from telegram.ext import CallbackContext, MessageHandler, Filters
+from telegram.ext import CallbackContext, MessageHandler, filters
 from telegram.ext import ConversationHandler
 from data_handler import update_user_data, get_user_data
 from core.session import require_profile
@@ -887,7 +887,7 @@ def finish_update_country(update, context):
 
     # Register handlers
 def register_user_handlers(dispatcher):
-    from telegram.ext import CommandHandler, MessageHandler, Filters, CallbackQueryHandler, ConversationHandler
+    from telegram.ext import CommandHandler, MessageHandler, filters, CallbackQueryHandler, ConversationHandler
     from handlers.menu_handlers import handle_menu_selection
 
     # ✅ Conversation: إنشاء الملف الشخصي
@@ -895,23 +895,23 @@ def register_user_handlers(dispatcher):
         entry_points=[CommandHandler("start", start)],
         states={
             dispatcher.bot_data.get("SELECT_LANG", 0): [
-                MessageHandler(Filters.text & ~Filters.command,
+                MessageHandler(filters.text & ~filters.command,
                                language_selection)
             ],
             dispatcher.bot_data.get("SELECT_GENDER", 1): [
-                MessageHandler(Filters.text & ~Filters.command,
+                MessageHandler(filters.text & ~filters.command,
                                gender_selection)
             ],
             dispatcher.bot_data.get("SELECT_REGION", 2): [
-                MessageHandler(Filters.text & ~Filters.command,
+                MessageHandler(filters.text & ~filters.command,
                                region_selection)
             ],
             dispatcher.bot_data.get("SELECT_COUNTRY_IN_REGION", 3): [
-                MessageHandler(Filters.text & ~Filters.command,
+                MessageHandler(filters.text & ~filters.command,
                                country_selection)
             ],
         },
-        fallbacks=[MessageHandler(Filters.regex(r"^⬅️ "), go_back_to_menu)],
+        fallbacks=[MessageHandler(filters.regex(r"^⬅️ "), go_back_to_menu)],
         name="profile_conversation",
         persistent=False)
     dispatcher.add_handler(profile_conv_handler)
@@ -919,81 +919,81 @@ def register_user_handlers(dispatcher):
     # ✅ Conversations: تحديث الحقول (لغة، جنس، منطقة، بلد)
     language_conv = ConversationHandler(entry_points=[
         MessageHandler(
-            Filters.regex(
+            filters.regex(
                 r"^(تحديث اللغة|Update Language|Ubah Bahasa|भाषा अपडेट करें)$"
             ), start_update_language)
     ],
                                         states={
                                             1: [
                                                 MessageHandler(
-                                                    Filters.text
-                                                    & ~Filters.command,
+                                                    filters.text
+                                                    & ~filters.command,
                                                     finish_update_language)
                                             ]
                                         },
                                         fallbacks=[
                                             MessageHandler(
-                                                Filters.regex(r"^⬅️ "),
+                                                filters.regex(r"^⬅️ "),
                                                 go_back_to_menu)
                                         ])
 
     gender_conv = ConversationHandler(entry_points=[
         MessageHandler(
-            Filters.regex(
+            filters.regex(
                 r"^(تحديث الجنس|Update Gender|Perbarui Jenis Kelamin|लिंग अपडेट करें)$"
             ), start_update_gender)
     ],
                                       states={
                                           1: [
                                               MessageHandler(
-                                                  Filters.text
-                                                  & ~Filters.command,
+                                                  filters.text
+                                                  & ~filters.command,
                                                   finish_update_gender)
                                           ]
                                       },
                                       fallbacks=[
                                           MessageHandler(
-                                              Filters.regex(r"^⬅️ "),
+                                              filters.regex(r"^⬅️ "),
                                               go_back_to_menu)
                                       ])
 
     region_conv = ConversationHandler(entry_points=[
         MessageHandler(
-            Filters.regex(
+            filters.regex(
                 r"^(تحديث المنطقة|Update Region|Perbarui Wilayah|क्षेत्र अपडेट करें)$"
             ), start_update_region)
     ],
                                       states={
                                           1: [
                                               MessageHandler(
-                                                  Filters.text
-                                                  & ~Filters.command,
+                                                  filters.text
+                                                  & ~filters.command,
                                                   finish_update_region)
                                           ]
                                       },
                                       fallbacks=[
                                           MessageHandler(
-                                              Filters.regex(r"^⬅️ "),
+                                              filters.regex(r"^⬅️ "),
                                               go_back_to_menu)
                                       ])
 
     country_conv = ConversationHandler(entry_points=[
         MessageHandler(
-            Filters.regex(
+            filters.regex(
                 r"^(تحديث البلد|Update Country|Perbarui Negara|देश अपडेट करें)$"
             ), start_update_country)
     ],
                                        states={
                                            1: [
                                                MessageHandler(
-                                                   Filters.text
-                                                   & ~Filters.command,
+                                                   filters.text
+                                                   & ~filters.command,
                                                    finish_update_country)
                                            ]
                                        },
                                        fallbacks=[
                                            MessageHandler(
-                                               Filters.regex(r"^⬅️ "),
+                                               filters.regex(r"^⬅️ "),
                                                go_back_to_menu)
                                        ])
 
@@ -1011,15 +1011,15 @@ def register_user_handlers(dispatcher):
     dispatcher.add_handler(CommandHandler("profile", update_profile_command))
 
     # ❌ لا تضف هذا السطر الآن، لأنه يعترض كل شيء:
-    # dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_menu_selection))
+    # dispatcher.add_handler(MessageHandler(filters.text & ~filters.command, handle_menu_selection))
     # Handler for messages during chat session
     dispatcher.add_handler(
-        MessageHandler(Filters.text & ~Filters.command, chat_message_handler)
+        MessageHandler(filters.text & ~filters.command, chat_message_handler)
     )
 
     # ✅ تمرير أي رسالة إلى المسؤول (يأتي آخرًا)
     dispatcher.add_handler(
-        MessageHandler(~Filters.text & ~Filters.command, forward_message))
+        MessageHandler(~filters.text & ~filters.command, forward_message))
     
 
 
