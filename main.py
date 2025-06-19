@@ -13,25 +13,11 @@ from telegram.ext import (ApplicationBuilder, CommandHandler, MessageHandler,
                           ConversationHandler, CallbackQueryHandler,
                           ContextTypes, filters)
 import sys  # Add this with other imports
-# Import configuration
-import config
-
-# Import core modules
-from core.session import init_session_manager
-from core.database import init_database_manager
-from core.security import init_spam_protection
-from core.notifications import init_notification_manager
-from core.data_validation import initialize_data_directories, validate_and_repair_data_files
-
-# Import handlers
-from handlers.user_handlers import register_user_handlers
-from handlers.admin_handlers import register_admin_handlers
-from handlers.search_handlers import register_search_handlers
-from handlers.payment_handlers import register_payment_handlers
-from handlers.menu_handlers import register_menu_handlers
-
-# Fix: Import missing callback handler
-from handlers.admin_handlers import toggle_premium_callback
+# Configure logging FIRST to capture all logs
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Workaround for Python 3.13 compatibility# Workaround for Python 3.13 compatibility
 try:
@@ -59,11 +45,27 @@ except ImportError as e:
             return mime.split('/')[-1].upper() if mime else None
         except Exception:
             return None
-# Configure logging FIRST to capture all logs
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.INFO)
-logger = logging.getLogger(__name__)
+
+# Import configuration
+import config
+
+# Import core modules
+from core.session import init_session_manager
+from core.database import init_database_manager
+from core.security import init_spam_protection
+from core.notifications import init_notification_manager
+from core.data_validation import initialize_data_directories, validate_and_repair_data_files
+
+# Import handlers
+from handlers.user_handlers import register_user_handlers
+from handlers.admin_handlers import register_admin_handlers
+from handlers.search_handlers import register_search_handlers
+from handlers.payment_handlers import register_payment_handlers
+from handlers.menu_handlers import register_menu_handlers
+
+# Fix: Import missing callback handler
+from handlers.admin_handlers import toggle_premium_callback
+
 
 DEEPSEEK_URL = "https://openrouter.ai/api/v1/chat/completions"
 
