@@ -9,9 +9,9 @@ This module provides menu-related functionality including:
 
 import logging
 from typing import Dict, List, Any, Optional
-from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, ParseMode
+from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, MessageEntity
 from telegram.ext import CallbackContext
-from telegram.constants import ParseMode, MessageEntity
+from telegram.constants import ParseMode
 # Import core modules
 from core.session import require_profile
 from core.database import get_database_manager
