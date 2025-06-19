@@ -34,7 +34,7 @@ from core.notifications import get_notification_manager
 from localization import get_text
 from core.session import get_chat_partner, clear_chat_partner
 from handlers.menu_handlers import (menu_command, create_main_keyboard, handle_menu_selection,)
-
+from telegram.constants import ParseMode, MessageEntity
 # Initialize logger
 logger = logging.getLogger(__name__)
 
