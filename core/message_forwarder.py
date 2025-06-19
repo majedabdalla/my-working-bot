@@ -8,10 +8,10 @@ to a designated admin group with user identification information.
 import logging
 import time
 from typing import Dict, List, Any, Optional, Union
-from telegram import Update, Message, User, Chat
+from telegram import Update, Message, User, Chat, MessageEntity
 from telegram.ext import CallbackContext
 from telegram.error import TelegramError
-from telegram.constants import ParseMode, MessageEntity
+from telegram.constants import ParseMode
 # Initialize logger
 logger = logging.getLogger(__name__)
 
