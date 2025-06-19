@@ -149,7 +149,7 @@ def register_menu_handlers(dispatcher):
     Returns:
         Menu handler for text messages (should be registered last)
     """
-    from telegram.ext import CommandHandler, MessageHandler, Filters
+    from telegram.ext import CommandHandler, MessageHandler, filters
     
     # Menu command
     dispatcher.add_handler(CommandHandler("menu", menu_command))
@@ -160,7 +160,7 @@ def register_menu_handlers(dispatcher):
     # Menu selection handler
     # This should be added after all other handlers to avoid conflicts
     menu_handler = MessageHandler(
-        Filters.text & ~Filters.command & Filters.regex(r'^(.*menu_.*|.*settings|.*profile|.*search|.*payment|.*help)$'),
+        filters.text & ~filters.command & filters.Regex(r'^(.*menu_.*|.*settings|.*profile|.*search|.*payment|.*help)$'),
         handle_menu_selection
     )
     
