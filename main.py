@@ -47,7 +47,10 @@ def get_image_type(file_path):
             return img.format
     except:
         return None
-except ImportError:
+except ImportError as e:
+    logger.error(f"Critical import error: {e}")
+    # Consider exiting if this is a critical dependency
+    sys.exit(1)
     import mimetypes as imghdr  # Fallback for Python 3.13+
 # Configure logging FIRST to capture all logs
 logging.basicConfig(
