@@ -933,7 +933,7 @@ def register_user_handlers(dispatcher):
                                         },
                                         fallbacks=[
                                             MessageHandler(
-                                                filters.regex(r"^⬅️ "),
+                                                filters.Regex(r"^⬅️ "),
                                                 go_back_to_menu)
                                         ])
 
