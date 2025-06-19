@@ -203,7 +203,7 @@ def handle_payment_proof(update: Update, context: CallbackContext) -> int:
 # Register handlers
 def register_payment_handlers(dispatcher):
     """Register all payment handlers with the dispatcher."""
-    from telegram.ext import CommandHandler, CallbackQueryHandler, MessageHandler, Filters, ConversationHandler
+    from telegram.ext import CommandHandler, CallbackQueryHandler, MessageHandler, filters, ConversationHandler
     
     # Payment command
     dispatcher.add_handler(CommandHandler("payment", payment_command))
@@ -213,7 +213,7 @@ def register_payment_handlers(dispatcher):
         entry_points=[CallbackQueryHandler(payment_verification_callback, pattern="^verify_payment$")],
         states={
             dispatcher.bot_data.get("PAYMENT_PROOF", 8): [
-                MessageHandler(Filters.all & ~Filters.command, handle_payment_proof)
+                MessageHandler(filters.all & ~filters.command, handle_payment_proof)
             ],
         },
         fallbacks=[CommandHandler("cancel", lambda u, c: ConversationHandler.END)],
