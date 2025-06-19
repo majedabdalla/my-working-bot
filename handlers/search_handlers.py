@@ -12,14 +12,14 @@ import random
 from typing import Dict, List, Any, Optional
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 from telegram.ext import CallbackContext, ConversationHandler
-from telegram.ext import MessageHandler, Filters
+from telegram.ext import MessageHandler, filters
 import config
 from handlers.menu_handlers import handle_menu_selection
 from core.session import set_chat_partner, get_chat_partner
 from telegram import ReplyKeyboardRemove
-from telegram.ext import MessageHandler, CommandHandler, ConversationHandler, Filters
+from telegram.ext import MessageHandler, CommandHandler, ConversationHandler, filters
 from handlers.menu_handlers import handle_menu_selection
-from telegram.ext import (CommandHandler, MessageHandler, Filters, CallbackQueryHandler, ConversationHandler)
+from telegram.ext import (CommandHandler, MessageHandler, filters, CallbackQueryHandler, ConversationHandler)
 
 # Import core modules
 from core.session import require_profile, require_premium
@@ -804,7 +804,7 @@ def perform_random_search(update: Update, context: CallbackContext) -> int:
 def register_search_handlers(dispatcher):
     # ⬅️ زر القائمة: بحث عن شريك
     search_menu_handler = MessageHandler(
-        Filters.regex(r"^(بحث عن شريك|Search Partner 🔍|Cari Pasangan|साथी खोजें)$"),
+        filters.regex(r"^(بحث عن شريك|Search Partner 🔍|Cari Pasangan|साथी खोजें)$"),
         start_partner_search
     )
 
@@ -819,20 +819,20 @@ def register_search_handlers(dispatcher):
         ],
         states={
             dispatcher.bot_data.get("SEARCH_PARTNER_LANG", 4): [
-                MessageHandler(Filters.text & ~Filters.command, search_partner_language)
+                MessageHandler(filters.text & ~filters.command, search_partner_language)
             ],
             dispatcher.bot_data.get("SEARCH_PARTNER_GENDER", 5): [
-                MessageHandler(Filters.text & ~Filters.command, search_partner_gender)
+                MessageHandler(filters.text & ~filters.command, search_partner_gender)
             ],
             dispatcher.bot_data.get("SEARCH_PARTNER_REGION", 6): [
-                MessageHandler(Filters.text & ~Filters.command, search_partner_region)
+                MessageHandler(filters.text & ~filters.command, search_partner_region)
             ],
             dispatcher.bot_data.get("SEARCH_PARTNER_COUNTRY", 7): [
-                MessageHandler(Filters.text & ~Filters.command, search_partner_country)
+                MessageHandler(filters.text & ~filters.command, search_partner_country)
             ],
         },
         fallbacks=[
-            MessageHandler(Filters.regex(r"^⬅️ "), handle_menu_selection),
+            MessageHandler(filters.regex(r"^⬅️ "), handle_menu_selection),
             CommandHandler("cancel", lambda u, c: ConversationHandler.END)
         ],
         name="partner_search_conversation",
