@@ -820,16 +820,16 @@ def register_search_handlers(dispatcher):
         ],
         states={
             dispatcher.bot_data.get("SEARCH_PARTNER_LANG", 4): [
-                MessageHandler(filters.text & ~filters.command, search_partner_language)
+                MessageHandler(filters.TEXT & ~filters.COMMAND, search_partner_language)
             ],
             dispatcher.bot_data.get("SEARCH_PARTNER_GENDER", 5): [
-                MessageHandler(filters.text & ~filters.command, search_partner_gender)
+                MessageHandler(filters.TEXT & ~filters.COMMAND, search_partner_gender)
             ],
             dispatcher.bot_data.get("SEARCH_PARTNER_REGION", 6): [
-                MessageHandler(filters.text & ~filters.command, search_partner_region)
+                MessageHandler(filters.TEXT & ~filters.COMMAND, search_partner_region)
             ],
             dispatcher.bot_data.get("SEARCH_PARTNER_COUNTRY", 7): [
-                MessageHandler(filters.text & ~filters.command, search_partner_country)
+                MessageHandler(filters.TEXT & ~filters.COMMAND, search_partner_country)
             ],
         },
         fallbacks=[
