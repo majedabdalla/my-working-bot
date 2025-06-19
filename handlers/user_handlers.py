@@ -13,8 +13,8 @@ import logging
 import json
 import os
 from typing import Dict, List, Any, Optional, Union
-from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
-from handlers.menu_handlers import create_main_keyboard
+from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.constants import ParseMode  # Correct import pathfrom handlers.menu_handlers import create_main_keyboard
 from localization import get_text
 from telegram.ext import CallbackContext, MessageHandler, filters
 from telegram.ext import ConversationHandler
