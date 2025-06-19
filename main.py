@@ -12,7 +12,7 @@ from telegram import Update
 from telegram.ext import (Updater, CommandHandler, MessageHandler,
                           ConversationHandler, CallbackQueryHandler,
                           CallbackContext, filters)  # Move filters to the end
-
+import sys  # Add this with other imports
 # Import configuration
 import config
 
@@ -35,7 +35,15 @@ from handlers.admin_handlers import toggle_premium_callback
 
 # Workaround for Python 3.13 compatibility
 try:
-    import imghdr
+    # Use PIL/Pillow for image type detection
+from PIL import Image
+
+def get_image_type(file_path):
+    try:
+        with Image.open(file_path) as img:
+            return img.format
+    except:
+        return None
 except ImportError:
     import mimetypes as imghdr  # Fallback for Python 3.13+
 # Configure logging FIRST to capture all logs
@@ -147,7 +155,7 @@ def main() -> None:
     try:
         setup_data_directories()
 
-        updater = Updater(token=config.BOT_TOKEN)
+        updater = Updater(config.BOT_TOKEN)
         dispatcher = updater.dispatcher
 
         # Initialize bot data
@@ -264,4 +272,4 @@ if __name__ == "__main__":
         logger.error(f"Unhandled exception: {e}", exc_info=True)
         # Critical error - wait before restart
         threading.Event().wait(60)
-        os.execv(sys.executable, ['python'] + sys.argv)
+        os.execv(sys.executable, [sys.executable] + sys.argv)
