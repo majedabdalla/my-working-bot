@@ -10,7 +10,7 @@ This module provides payment functionality including:
 import logging
 import time
 from typing import Dict, List, Any, Optional
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext, ConversationHandler
 from telegram.constants import ParseMode, MessageEntity
 # Import core modules
