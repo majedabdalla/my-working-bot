@@ -1,5 +1,5 @@
 """
-Main entry point for MultiLangTranslator Bot
+Main entry point for MultiLangTranslator
 """
 
 import logging
