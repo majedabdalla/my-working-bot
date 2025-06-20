@@ -18,11 +18,19 @@ from telegram.ext import (
 import sys
 
 # Configure logging FIRST to capture all logs
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.INFO
-)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+# Console handler
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+
+# File handler (rotating)
+file_handler = RotatingFileHandler('bot.log', maxBytes=5*1024*1024, backupCount=3)
+file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
 
 # Workaround for Python 3.13 compatibility
 try:
