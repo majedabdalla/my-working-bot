@@ -61,7 +61,16 @@ import config
 # Import core modules
 from core.session import init_session_manager
 from core.database import init_database_manager
-from core.security import init_spam_protection
+try:
+    from core.security import init_spam_protection, get_spam_protection
+except ImportError as e:
+    print(f"Import error: {e}")
+    # Create fallback functions
+    def init_spam_protection():
+        pass
+    
+    def get_spam_protection():
+        return None
 from core.notifications import init_notification_manager
 from core.data_validation import initialize_data_directories, validate_and_repair_data_files
 
