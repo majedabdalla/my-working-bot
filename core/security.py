@@ -9,7 +9,7 @@ import logging
 import threading
 from typing import Dict, List, Set, Tuple, Optional
 import re
-
+from telegram.ext import RateLimiter
 # Initialize logger
 logger = logging.getLogger(__name__)
 
@@ -276,6 +276,7 @@ class SpamProtection:
 spam_protection = None
 
 def init_spam_protection(
+    application: Application,  # Add this parameter
     rate_limit_window: int = 60,
     rate_limit_max_messages: int = 20,
     pattern_threshold: int = 3,
@@ -291,6 +292,20 @@ def init_spam_protection(
         block_duration: Duration of automatic blocks in seconds
     """
     global spam_protection
+    
+    # Add rate limiter to application
+    application.add_handler(
+        MessageHandler(filters.ALL, None),
+        rate_limiter=RateLimiter(
+            max_messages_per_second=5,
+            max_messages_per_minute=30,
+            max_messages_per_hour=200,
+            per_user=True,
+            per_chat=True,
+            per_message=False
+        )
+    )
+    
     spam_protection = SpamProtection(
         rate_limit_window=rate_limit_window,
         rate_limit_max_messages=rate_limit_max_messages,
