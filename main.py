@@ -4,6 +4,8 @@ Main entry point for MultiLangTranslator Bot
 
 import logging
 import os
+import threading
+from flask import Flask, jsonify
 from telegram.ext import Application
 
 # Configure logging
@@ -13,9 +15,38 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Create Flask app for health checks
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return jsonify({
+        "status": "running",
+        "service": "MultiLangTranslator Bot",
+        "message": "Bot is active and polling for updates"
+    })
+
+@app.route('/health')
+def health():
+    return jsonify({"status": "healthy"})
+
+@app.route('/ping')
+def ping():
+    return jsonify({"status": "pong"})
+
+def run_flask():
+    """Run Flask app in a separate thread"""
+    port = int(os.environ.get('PORT', 10000))
+    app.run(host='0.0.0.0', port=port, debug=False)
+
 def main():
     """Main function to start the bot"""
     try:
+        # Start Flask server in background thread
+        flask_thread = threading.Thread(target=run_flask, daemon=True)
+        flask_thread.start()
+        logger.info(f"Flask server started on port {os.environ.get('PORT', 10000)}")
+        
         # Get bot token
         token = os.getenv('BOT_TOKEN')
         if not token:
@@ -61,7 +92,7 @@ def main():
             logger.error(f"Failed to import menu handlers: {e}")
         
         # Start the bot
-        logger.info("Starting bot...")
+        logger.info("Starting Telegram bot...")
         application.run_polling(drop_pending_updates=True)
         
     except Exception as e:
