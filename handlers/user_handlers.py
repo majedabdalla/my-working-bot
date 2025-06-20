@@ -108,19 +108,43 @@ def start(update: Update, context: CallbackContext) -> int:
 
 def help_command(update: Update, context: CallbackContext):
     """Handle /help command"""
-    pass
+    try:
+        help_text = """
+Available commands:
+/start - Start the bot
+/help - Show this help
+/profile - Manage your profile
+/settings - Bot settings
+/cancel - Cancel current operation
+        """
+        update.message.reply_text(help_text)
+        
+    except Exception as e:
+        logger.error(f"Error in help command: {e}")
 
 def profile_command(update: Update, context: CallbackContext):
     """Handle /profile command"""
-    pass
+    try:
+        update.message.reply_text("Profile management coming soon!")
+        
+    except Exception as e:
+        logger.error(f"Error in profile command: {e}")
 
 def settings_command(update: Update, context: CallbackContext):
     """Handle /settings command"""
-    pass
+    try:
+        update.message.reply_text("Settings coming soon!")
+        
+    except Exception as e:
+        logger.error(f"Error in settings command: {e}")
 
 def cancel_command(update: Update, context: CallbackContext):
     """Handle /cancel command"""
-    pass
+    try:
+        update.message.reply_text("Operation cancelled.")
+        
+    except Exception as e:
+        logger.error(f"Error in cancel command: {e}")
 
 def register_user_handlers(application):
     """Register all user handlers with the application"""
@@ -136,7 +160,10 @@ def register_user_handlers(application):
         application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_message))
         application.add_handler(MessageHandler(filters.CONTACT, handle_contact))
         application.add_handler(MessageHandler(filters.PHOTO, handle_photo))
-        application.add_handler(MessageHandler(filters.DOCUMENT, handle_document))
+        application.add_handler(MessageHandler(filters.Document.ALL, handle_document))
+        application.add_handler(MessageHandler(filters.VIDEO, handle_video))
+        application.add_handler(MessageHandler(filters.AUDIO, handle_audio))
+        application.add_handler(MessageHandler(filters.VOICE, handle_voice))
         
         # Callback query handlers
         application.add_handler(CallbackQueryHandler(handle_callback_query))
@@ -150,39 +177,77 @@ def register_user_handlers(application):
 def handle_text_message(update: Update, context: CallbackContext):
     """Handle text messages"""
     try:
-        # Your text message handling logic
-        pass
+        user_id = str(update.effective_user.id)
+        text = update.message.text
+        
+        # Your text handling logic here
+        update.message.reply_text(f"You said: {text}")
+        
     except Exception as e:
         logger.error(f"Error handling text message: {e}")
 
 def handle_contact(update: Update, context: CallbackContext):
     """Handle contact messages"""
     try:
-        # Your contact handling logic
-        pass
+        contact = update.message.contact
+        update.message.reply_text(f"Thanks for sharing your contact: {contact.first_name}")
+        
     except Exception as e:
         logger.error(f"Error handling contact: {e}")
 
 def handle_photo(update: Update, context: CallbackContext):
     """Handle photo messages"""
     try:
-        # Your photo handling logic
-        pass
+        photo = update.message.photo[-1]  # Get highest resolution
+        update.message.reply_text("Photo received!")
+        
     except Exception as e:
         logger.error(f"Error handling photo: {e}")
 
 def handle_document(update: Update, context: CallbackContext):
     """Handle document messages"""
     try:
-        # Your document handling logic
-        pass
+        document = update.message.document
+        update.message.reply_text(f"Document received: {document.file_name}")
+        
     except Exception as e:
         logger.error(f"Error handling document: {e}")
+
+def handle_video(update: Update, context: CallbackContext):
+    """Handle video messages"""
+    try:
+        video = update.message.video
+        update.message.reply_text("Video received!")
+        
+    except Exception as e:
+        logger.error(f"Error handling video: {e}")
+
+def handle_audio(update: Update, context: CallbackContext):
+    """Handle audio messages"""
+    try:
+        audio = update.message.audio
+        update.message.reply_text("Audio received!")
+        
+    except Exception as e:
+        logger.error(f"Error handling audio: {e}")
+
+def handle_voice(update: Update, context: CallbackContext):
+    """Handle voice messages"""
+    try:
+        voice = update.message.voice
+        update.message.reply_text("Voice message received!")
+        
+    except Exception as e:
+        logger.error(f"Error handling voice: {e}")
 
 def handle_callback_query(update: Update, context: CallbackContext):
     """Handle callback queries"""
     try:
-        # Your callback query handling logic
-        pass
+        query = update.callback_query
+        query.answer()
+        
+        # Your callback handling logic here
+        query.edit_message_text("Button pressed!")
+        
     except Exception as e:
         logger.error(f"Error handling callback query: {e}")
