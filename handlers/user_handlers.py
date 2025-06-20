@@ -3,17 +3,9 @@ User handlers module for MultiLangTranslator Bot
 """
 
 import logging
-import json
-import os
-from typing import Dict, List, Any, Optional, Union
-
-# Telegram imports
-from telegram import (
-    Update, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, 
-    InlineKeyboardButton, InlineKeyboardMarkup, MessageEntity
-)
-from telegram.constants import ParseMode
-from telegram.ext import CallbackContext, MessageHandler, filters, ConversationHandler
+from telegram.ext import CommandHandler, MessageHandler, filters, CallbackQueryHandler
+from telegram import Update
+from telegram.ext import CallbackContext
 
 # Local imports - organize to avoid circular imports
 try:
@@ -113,3 +105,84 @@ def start(update: Update, context: CallbackContext) -> int:
             update.message.reply_text("An error occurred. Please try again.")
         except:
             pass
+
+def help_command(update: Update, context: CallbackContext):
+    """Handle /help command"""
+    pass
+
+def profile_command(update: Update, context: CallbackContext):
+    """Handle /profile command"""
+    pass
+
+def settings_command(update: Update, context: CallbackContext):
+    """Handle /settings command"""
+    pass
+
+def cancel_command(update: Update, context: CallbackContext):
+    """Handle /cancel command"""
+    pass
+
+def register_user_handlers(application):
+    """Register all user handlers with the application"""
+    try:
+        # Command handlers
+        application.add_handler(CommandHandler("start", start))
+        application.add_handler(CommandHandler("help", help_command))
+        application.add_handler(CommandHandler("profile", profile_command))
+        application.add_handler(CommandHandler("settings", settings_command))
+        application.add_handler(CommandHandler("cancel", cancel_command))
+        
+        # Message handlers
+        application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_message))
+        application.add_handler(MessageHandler(filters.CONTACT, handle_contact))
+        application.add_handler(MessageHandler(filters.PHOTO, handle_photo))
+        application.add_handler(MessageHandler(filters.DOCUMENT, handle_document))
+        
+        # Callback query handlers
+        application.add_handler(CallbackQueryHandler(handle_callback_query))
+        
+        logger.info("User handlers registered successfully")
+        
+    except Exception as e:
+        logger.error(f"Error registering user handlers: {e}")
+        raise
+
+def handle_text_message(update: Update, context: CallbackContext):
+    """Handle text messages"""
+    try:
+        # Your text message handling logic
+        pass
+    except Exception as e:
+        logger.error(f"Error handling text message: {e}")
+
+def handle_contact(update: Update, context: CallbackContext):
+    """Handle contact messages"""
+    try:
+        # Your contact handling logic
+        pass
+    except Exception as e:
+        logger.error(f"Error handling contact: {e}")
+
+def handle_photo(update: Update, context: CallbackContext):
+    """Handle photo messages"""
+    try:
+        # Your photo handling logic
+        pass
+    except Exception as e:
+        logger.error(f"Error handling photo: {e}")
+
+def handle_document(update: Update, context: CallbackContext):
+    """Handle document messages"""
+    try:
+        # Your document handling logic
+        pass
+    except Exception as e:
+        logger.error(f"Error handling document: {e}")
+
+def handle_callback_query(update: Update, context: CallbackContext):
+    """Handle callback queries"""
+    try:
+        # Your callback query handling logic
+        pass
+    except Exception as e:
+        logger.error(f"Error handling callback query: {e}")

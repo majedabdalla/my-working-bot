@@ -844,52 +844,10 @@ def perform_random_search(update: Update, context: CallbackContext) -> int:
     return ConversationHandler.END
 
 
-def register_search_handlers(dispatcher):
-    # ⬅️ زر القائمة: بحث عن شريك
-    search_menu_handler = MessageHandler(
-        filters.Regex(r"^(بحث عن شريك|Search Partner 🔍|Cari Pasangan|साथी खोजें)$"),
-        start_partner_search
-    )
-
-    # 🧭 أمر /search
-    search_command_handler = CommandHandler("search", start_partner_search)
-
-    # 🔁 محادثة البحث التفاعلي
-    search_conv_handler = ConversationHandler(
-        entry_points=[
-            search_command_handler,
-            search_menu_handler
-        ],
-        states={
-            dispatcher.bot_data.get("SEARCH_PARTNER_LANG", 4): [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, search_partner_language)
-            ],
-            dispatcher.bot_data.get("SEARCH_PARTNER_GENDER", 5): [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, search_partner_gender)
-            ],
-            dispatcher.bot_data.get("SEARCH_PARTNER_REGION", 6): [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, search_partner_region)
-            ],
-            dispatcher.bot_data.get("SEARCH_PARTNER_COUNTRY", 7): [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, search_partner_country)
-            ],
-        },
-        fallbacks=[
-            MessageHandler(filters.Regex(r"^⬅️ "), handle_menu_selection),
-            CommandHandler("cancel", lambda u, c: ConversationHandler.END)
-        ],
-        name="partner_search_conversation",
-        persistent=False
-    )
-
-    # تسجيل المحادثة التفاعلية
-    dispatcher.add_handler(search_conv_handler)
-
-    # 🔘 ردود الأزرار التفاعلية للنتائج
-    dispatcher.add_handler(CallbackQueryHandler(contact_user_callback, pattern="^contact_"))
-    dispatcher.add_handler(CallbackQueryHandler(search_again_callback, pattern="^search_again$"))
-    dispatcher.add_handler(CallbackQueryHandler(accept_contact_callback, pattern="^accept_contact_"))
-    dispatcher.add_handler(CallbackQueryHandler(decline_contact_callback, pattern="^decline_contact_"))
+def register_search_handlers(application):
+    """Register search handlers"""
+    # Add your search handlers here
+    pass
 
 
 def perform_random_search(update, context):

@@ -673,23 +673,10 @@ def verify_payment_callback(update: Update, context: CallbackContext) -> None:
         )
 
 # Register handlers
-def register_admin_handlers(dispatcher):
-    """Register all admin handlers with the dispatcher."""
-    # Admin dashboard
-    dispatcher.add_handler(CommandHandler("admin", admin_dashboard))
-    dispatcher.add_handler(CallbackQueryHandler(admin_dashboard_callback, pattern="^admin_"))
-    
-    # Block/unblock commands
-    dispatcher.add_handler(CommandHandler("block", block_user_command))
-    dispatcher.add_handler(CommandHandler("unblock", unblock_user_command))
-    
-    # List users command
-    dispatcher.add_handler(CommandHandler("users", list_users_command))
-    
-    # Payment verification
-    dispatcher.add_handler(CallbackQueryHandler(verify_payment_callback, pattern="^(approve|reject)_payment_"))
-
-
+def register_admin_handlers(application):
+    """Register admin handlers"""
+    # Add your admin handlers here
+    pass
 
 # Toggle premium status callback
 @admin_only
@@ -726,5 +713,3 @@ def toggle_premium_callback(update: Update, context: CallbackContext) -> None:
     notification_manager.notify_user(user_id_to_toggle, message_to_user)
 
     logger.info(f"Admin {update.effective_user.id} toggled premium for user {user_id_to_toggle}. New status: {not is_premium}")
-
-
