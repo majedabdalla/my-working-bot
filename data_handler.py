@@ -147,50 +147,72 @@ def is_country_in_region(country: str, region: str) -> bool:
 
 def find_matching_users(criteria: Dict[str, Any]) -> List[Dict[str, Any]]:
     """Find users matching the specified search criteria."""
-    all_users = load_user_data()
-    matching_users = []
+    try:
+        # Validate criteria
+        if not criteria or not isinstance(criteria, dict):
+            logger.error("find_matching_users: Invalid criteria provided")
+            return []
+            
+        all_users = load_user_data()
+        
+        if not all_users:
+            logger.warning("find_matching_users: No users data loaded")
+            return []
+            
+        matching_users = []
+        current_user_id = str(criteria.get("user_id", ""))
 
-    for user_id, user_data in all_users.items():
-        # Skip if profile is not complete, user is blocked, or user is searching for themselves
-        if (not user_data.get("profile_complete", False)
-                or user_data.get("blocked", False)
-                or str(user_id) == str(criteria.get("user_id", 0))):
-            continue
+        for user_id, user_data in all_users.items():
+            try:
+                # Skip if user_data is None or not a dict
+                if not user_data or not isinstance(user_data, dict):
+                    continue
+                    
+                # Skip if profile is not complete, user is blocked, or user is searching for themselves
+                if (not user_data.get("profile_complete", False)
+                        or user_data.get("blocked", False)
+                        or str(user_id) == current_user_id):
+                    continue
 
-        match = True
+                match = True
 
-        # Check language match
-        if criteria.get("language") and criteria["language"] != "any":
-            if user_data.get("language") != criteria["language"]:
-                match = False
+                # Check language match
+                if criteria.get("language") and criteria["language"] != "any":
+                    user_language = user_data.get("language")
+                    if not user_language or user_language != criteria["language"]:
+                        match = False
 
-        # Check gender match
-        if criteria.get("gender") and criteria["gender"] != "any":
-            if user_data.get("gender") != criteria["gender"]:
-                match = False
+                # Check gender match
+                if criteria.get("gender") and criteria["gender"] != "any":
+                    user_gender = user_data.get("gender")
+                    if not user_gender or user_gender != criteria["gender"]:
+                        match = False
 
-        # Check country match
-        if criteria.get("country") and criteria["country"] != "any":
-            if user_data.get("country") != criteria["country"]:
-                match = False
+                # Check country match
+                if criteria.get("country") and criteria["country"] != "any":
+                    user_country = user_data.get("country")
+                    if not user_country or user_country != criteria["country"]:
+                        match = False
 
-        if match:
-            matching_users.append({
-                "user_id":
-                user_id,
-                "name":
-                user_data.get("name", "Unknown"),
-                "language":
-                user_data.get("language", "Unknown"),
-                "gender":
-                user_data.get("gender", "Unknown"),
-                "country":
-                user_data.get("country", "Unknown"),
-                "username":
-                user_data.get("username", None)
-            })
+                if match:
+                    matching_users.append({
+                        "user_id": str(user_id),
+                        "name": user_data.get("name", "Unknown"),
+                        "language": user_data.get("language", "Unknown"),
+                        "gender": user_data.get("gender", "Unknown"),
+                        "country": user_data.get("country", "Unknown"),
+                        "username": user_data.get("username", None)
+                    })
+                    
+            except Exception as e:
+                logger.error(f"Error processing user {user_id} in find_matching_users: {e}")
+                continue
 
-    return matching_users
+        return matching_users
+        
+    except Exception as e:
+        logger.error(f"Error in find_matching_users: {e}")
+        return []
 
 
 def get_all_users() -> List[Dict[str, Any]]:

@@ -94,26 +94,39 @@ class SessionManager:
         Returns:
             Session data dictionary
         """
-        with self.lock:
-            # Convert user_id to string for JSON compatibility
-            user_id_str = str(user_id)
-            
-            # Initialize user's sessions if not exist
-            if user_id_str not in self.sessions:
-                self.sessions[user_id_str] = {}
-            
-            # Initialize conversation session if not exist
-            if conversation_type not in self.sessions[user_id_str]:
-                self.sessions[user_id_str][conversation_type] = {
-                    "state": None,
-                    "data": {},
-                    "last_activity": time.time()
-                }
-            else:
-                # Update last activity time
-                self.sessions[user_id_str][conversation_type]["last_activity"] = time.time()
-            
-            return self.sessions[user_id_str][conversation_type]
+        try:
+            # Validate inputs
+            if not user_id or not isinstance(user_id, str):
+                logger.error(f"Invalid user_id provided: {user_id}")
+                return {"state": None, "data": {}, "last_activity": time.time()}
+                
+            if not conversation_type or not isinstance(conversation_type, str):
+                conversation_type = "default"
+                
+            with self.lock:
+                # Convert user_id to string for JSON compatibility
+                user_id_str = str(user_id)
+                
+                # Initialize user's sessions if not exist
+                if user_id_str not in self.sessions:
+                    self.sessions[user_id_str] = {}
+                
+                # Initialize conversation session if not exist
+                if conversation_type not in self.sessions[user_id_str]:
+                    self.sessions[user_id_str][conversation_type] = {
+                        "state": None,
+                        "data": {},
+                        "last_activity": time.time()
+                    }
+                else:
+                    # Update last activity time
+                    self.sessions[user_id_str][conversation_type]["last_activity"] = time.time()
+                
+                return self.sessions[user_id_str][conversation_type]
+                
+        except Exception as e:
+            logger.error(f"Error in get_session for user {user_id}: {e}")
+            return {"state": None, "data": {}, "last_activity": time.time()}
     
     def update_session(self, user_id: str, conversation_type: str, 
                       state: Optional[Any] = None, data: Optional[Dict[str, Any]] = None):

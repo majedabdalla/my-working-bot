@@ -592,51 +592,71 @@ def show_search_results(update: Update, context: CallbackContext,
 # Contact user callback
 def contact_user_callback(update: Update, context: CallbackContext) -> None:
     """Handle contact user callback."""
-    query = update.callback_query
-    query.answer()
+    try:
+        query = update.callback_query
+        query.answer()
 
-    user = update.effective_user
-    user_id = str(user.id)
+        user = update.effective_user
+        user_id = str(user.id)
 
-    # Extract target user ID from callback data
-    target_id = query.data.replace("contact_", "")
+        # Validate callback data
+        if not query.data or not query.data.startswith("contact_"):
+            query.edit_message_text(get_text(user_id, "invalid_request"))
+            return
 
-    # Get database manager
-    db_manager = get_database_manager()
+        # Extract target user ID from callback data
+        target_id = query.data.replace("contact_", "")
+        
+        # Validate target_id
+        if not target_id or target_id == user_id:
+            query.edit_message_text(get_text(user_id, "invalid_target"))
+            return
 
-    # Get target user data
-    target_data = db_manager.get_user_data(target_id)
+        # Get database manager
+        db_manager = get_database_manager()
 
-    if not target_data:
-        # User not found
-        query.edit_message_text(get_text(user_id, "user_not_found"),
+        # Get target user data
+        target_data = db_manager.get_user_data(target_id)
+
+        if not target_data:
+            query.edit_message_text(get_text(user_id, "user_not_found"),
+                                    parse_mode=ParseMode.HTML)
+            return
+
+        # Get notification manager
+        notification_manager = get_notification_manager()
+        
+        # Get current user data for language info
+        current_user_data = db_manager.get_user_data(user_id)
+        user_language = current_user_data.get("language", "en") if current_user_data else "en"
+
+        # Notify target user
+        notification_manager.notify_user(
+            target_id,
+            get_text(target_id,
+                     "contact_request",
+                     name=user.first_name or "Unknown",
+                     language=context.bot_data.get("supported_languages", {}).get(
+                         user_language, "Unknown")),
+            reply_markup=InlineKeyboardMarkup([[
+                InlineKeyboardButton(get_text(target_id, "accept_contact"),
+                                     callback_data=f"accept_contact_{user_id}"),
+                InlineKeyboardButton(get_text(target_id, "decline_contact"),
+                                     callback_data=f"decline_contact_{user_id}")
+            ]]))
+
+        # Notify requesting user
+        query.edit_message_text(get_text(user_id,
+                                         "contact_request_sent",
+                                         name=target_data.get("name", "Unknown")),
                                 parse_mode=ParseMode.HTML)
-        return
-
-    # Get notification manager
-    notification_manager = get_notification_manager()
-
-    # Notify target user
-    notification_manager.notify_user(
-        target_id,
-        get_text(target_id,
-                 "contact_request",
-                 name=user.first_name,
-                 language=context.bot_data.get("supported_languages", {}).get(
-                     db_manager.get_user_data(user_id).get("language", "en"),
-                     "Unknown")),
-        reply_markup=InlineKeyboardMarkup([[
-            InlineKeyboardButton(get_text(target_id, "accept_contact"),
-                                 callback_data=f"accept_contact_{user_id}"),
-            InlineKeyboardButton(get_text(target_id, "decline_contact"),
-                                 callback_data=f"decline_contact_{user_id}")
-        ]]))
-
-    # Notify requesting user
-    query.edit_message_text(get_text(user_id,
-                                     "contact_request_sent",
-                                     name=target_data.get("name", "Unknown")),
-                            parse_mode=ParseMode.HTML)
+                                
+    except Exception as e:
+        logger.error(f"Error in contact_user_callback: {e}")
+        try:
+            query.edit_message_text(get_text(user_id, "error_occurred"))
+        except:
+            pass
 
 
 # Search again callback
@@ -755,21 +775,43 @@ from random import choice
 from data_handler import get_user_data, get_all_users, has_complete_profile
 
 
-def find_random_partner(current_user_id: str) -> Dict[str, Any]:
+def find_random_partner(current_user_id: str) -> Optional[Dict[str, Any]]:
     """
     Find a random online user (excluding self) with a complete profile.
     """
-    all_users = get_all_users()
-    candidates = [
-        uid for uid in all_users
-        if uid != current_user_id and has_complete_profile(uid)
-    ]
+    try:
+        if not current_user_id:
+            logger.error("find_random_partner: current_user_id is empty")
+            return None
+            
+        all_users = get_all_users()
+        
+        # Handle case where get_all_users returns None
+        if not all_users:
+            logger.warning("find_random_partner: No users found")
+            return None
+            
+        candidates = [
+            uid for uid in all_users
+            if uid != current_user_id and has_complete_profile(uid)
+        ]
 
-    if not candidates:
+        if not candidates:
+            logger.info(f"find_random_partner: No candidates found for user {current_user_id}")
+            return None
+
+        chosen_id = choice(candidates)
+        user_data = get_user_data(chosen_id)
+        
+        # Add user_id to the returned data
+        if user_data:
+            user_data['user_id'] = chosen_id
+            
+        return user_data
+        
+    except Exception as e:
+        logger.error(f"Error in find_random_partner for user {current_user_id}: {e}")
         return None
-
-    chosen_id = choice(candidates)
-    return get_user_data(chosen_id)
 
 
 def perform_random_search(update: Update, context: CallbackContext) -> int:
