@@ -6,6 +6,7 @@ import logging
 import os
 import threading
 import time
+import asyncio
 from flask import Flask, jsonify
 from telegram.ext import Application
 from telegram.error import Conflict, NetworkError
@@ -41,18 +42,53 @@ def run_flask():
     port = int(os.environ.get('PORT', 10000))
     app.run(host='0.0.0.0', port=port, debug=False)
 
-def error_handler(update, context):
-    """Handle errors in the bot"""
+async def error_handler(update, context):
+    """Handle errors in the bot - ASYNC VERSION"""
     logger.error(f"Update {update} caused error {context.error}")
     
     if isinstance(context.error, Conflict):
         logger.error("Bot conflict detected - another instance may be running")
-        # Don't restart automatically to avoid infinite conflicts
         return
     
     if isinstance(context.error, NetworkError):
         logger.error("Network error occurred, bot will retry automatically")
         return
+    
+    # Handle other errors
+    if update and update.effective_message:
+        try:
+            await update.effective_message.reply_text(
+                "Sorry, an error occurred. Please try again later."
+            )
+        except Exception as e:
+            logger.error(f"Failed to send error message: {e}")
+
+def initialize_core_modules():
+    """Initialize all core modules"""
+    try:
+        # Initialize session manager
+        from core.session import init_session_manager
+        init_session_manager()
+        logger.info("Session manager initialized")
+        
+        # Initialize database manager
+        from core.database import init_database_manager
+        init_database_manager()
+        logger.info("Database manager initialized")
+        
+        # Initialize other core modules
+        from core.security import init_spam_protection
+        init_spam_protection()
+        logger.info("Spam protection initialized")
+        
+        from core.notifications import init_notification_manager
+        init_notification_manager()
+        logger.info("Notification manager initialized")
+        
+    except ImportError as e:
+        logger.warning(f"Some core modules not available: {e}")
+    except Exception as e:
+        logger.error(f"Error initializing core modules: {e}")
 
 def main():
     """Main function to start the bot"""
@@ -62,12 +98,15 @@ def main():
         flask_thread.start()
         logger.info(f"Flask server started on port {os.environ.get('PORT', 10000)}")
         
+        # Initialize core modules
+        initialize_core_modules()
+        
         # Get bot token
         token = os.getenv('BOT_TOKEN')
         if not token:
             raise ValueError("BOT_TOKEN environment variable not set")
         
-        # Create application with conflict handling
+        # Create application
         application = (
             Application.builder()
             .token(token)
@@ -75,7 +114,7 @@ def main():
             .build()
         )
         
-        # Add error handler
+        # Add ASYNC error handler
         application.add_error_handler(error_handler)
         
         # Register handlers with error handling
@@ -115,37 +154,15 @@ def main():
             logger.error(f"Failed to import menu handlers: {e}")
         
         # Wait a bit before starting to ensure any previous instance has stopped
-        logger.info("Waiting 10 seconds before starting bot to avoid conflicts...")
-        time.sleep(10)
+        logger.info("Waiting 5 seconds before starting bot...")
+        time.sleep(5)
         
-        # Start the bot with retry logic
-        max_retries = 3
-        retry_count = 0
-        
-        while retry_count < max_retries:
-            try:
-                logger.info(f"Starting Telegram bot (attempt {retry_count + 1}/{max_retries})...")
-                application.run_polling(
-                    drop_pending_updates=True,
-                    close_loop=False
-                )
-                break  # If successful, break out of retry loop
-                
-            except Conflict as e:
-                retry_count += 1
-                logger.error(f"Conflict error (attempt {retry_count}): {e}")
-                
-                if retry_count < max_retries:
-                    wait_time = 30 * retry_count  # Exponential backoff
-                    logger.info(f"Waiting {wait_time} seconds before retry...")
-                    time.sleep(wait_time)
-                else:
-                    logger.error("Max retries reached. Please ensure no other bot instances are running.")
-                    raise
-                    
-            except Exception as e:
-                logger.error(f"Unexpected error starting bot: {e}")
-                raise
+        # Start the bot
+        logger.info("Starting Telegram bot...")
+        application.run_polling(
+            drop_pending_updates=True,
+            close_loop=False
+        )
         
     except Exception as e:
         logger.error(f"Failed to start bot: {e}")
