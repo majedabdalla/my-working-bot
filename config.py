@@ -45,3 +45,5 @@ PAYMENT_PROOF = 8
 # Flask settings
 PORT = int(os.environ.get("PORT", 5000))
 SESSION_SECRET = os.environ.get("SESSION_SECRET", "multichatbot_secret_key")
+# Maintenance mode flag
+MAINTENANCE_MODE = False
