@@ -5,6 +5,7 @@ import traceback
 import os
 import json
 import logging
+from logging.handlers import RotatingFileHandler  # ADD THIS
 from telegram import Update
 from telegram.ext import (
     ApplicationBuilder,
@@ -17,7 +18,7 @@ from telegram.ext import (
 )
 import sys
 
-# Configure logging FIRST to capture all logs
+# Configure logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
@@ -71,6 +72,16 @@ from handlers.search_handlers import register_search_handlers
 from handlers.payment_handlers import register_payment_handlers
 from handlers.menu_handlers import register_menu_handlers
 from handlers.admin_handlers import toggle_premium_callback
+
+async def maintenance_check(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle maintenance mode"""
+    if config.MAINTENANCE_MODE:
+        if update.message:
+            await update.message.reply_text("⚠️ Bot is under maintenance. Please try again later.")
+        elif update.callback_query:
+            await update.callback_query.answer("Bot is under maintenance. Please try again later.", show_alert=True)
+        return True  # Block further processing
+    return False  # Continue processing
 
 def setup_data_directories():
     """Setup necessary directories and files."""
@@ -131,8 +142,12 @@ def main() -> None:
         # Initialize core modules
         init_session_manager("data/sessions.json")
         init_database_manager(config.USER_DATA_FILE, config.PENDING_PAYMENTS_FILE)
-        init_spam_protection()
+        init_spam_protection(application)
         init_notification_manager(application.bot, dispatcher.bot_data["admin_ids"])
+        
+        # ADD MAINTENANCE HANDLERS HERE
+        dispatcher.add_handler(MessageHandler(filters.ALL, maintenance_check), group=-1)
+        dispatcher.add_handler(CallbackQueryHandler(maintenance_check), group=-1)
 
         # Register handlers
         register_user_handlers(dispatcher)
@@ -168,12 +183,11 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     # Log the error
     logger.error(f"Error: {error}\nTraceback:\n{tb}")
     
-    # Notify admin
+    # Notify admin (shortened message)
     try:
         if context.bot_data.get("admin_ids"):
             for admin_id in context.bot_data["admin_ids"]:
                 try:
-                    # Send shortened error message
                     error_msg = f"⚠️ Bot Error:\n{type(error).__name__}: {str(error)[:200]}"
                     await context.bot.send_message(admin_id, text=error_msg)
                 except Exception as e:
@@ -183,7 +197,7 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
 if __name__ == "__main__":
     try:
-        main()
+        main()  # FIXED: Call without arguments
     except KeyboardInterrupt:
         logger.info("Bot stopped by user.")
     except Exception as e:
