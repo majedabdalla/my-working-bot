@@ -56,11 +56,10 @@ async def handle_profile_callback(query, user_id: str, user):
     """Handle profile button callback"""
     try:
         user_data = get_user_data(user_id)
-        profile_text = get_text(user_id, "profile_info", 
+        profile_text = get_text(user_id, "profile_info",
                                name=user.first_name,
                                language=user_data.get("language", "en"),
                                status="Active" if user_data.get("profile_complete") else "Incomplete")
-        
         await query.edit_message_text(profile_text, parse_mode=ParseMode.HTML)
         
     except Exception as e:
@@ -72,7 +71,6 @@ async def handle_search_callback(query, user_id: str):
     try:
         search_text = get_text(user_id, "search_partners")
         await query.edit_message_text(search_text, parse_mode=ParseMode.HTML)
-        
     except Exception as e:
         logger.error(f"Error in search callback: {e}")
         await query.edit_message_text("❌ Error loading search")
@@ -82,7 +80,6 @@ async def handle_settings_callback(query, user_id: str):
     try:
         settings_text = get_text(user_id, "settings_menu")
         await query.edit_message_text(settings_text, parse_mode=ParseMode.HTML)
-        
     except Exception as e:
         logger.error(f"Error in settings callback: {e}")
         await query.edit_message_text("❌ Error loading settings")
@@ -102,7 +99,6 @@ async def handle_premium_callback(query, user_id: str):
     try:
         premium_text = get_text(user_id, "premium_info")
         await query.edit_message_text(premium_text, parse_mode=ParseMode.HTML)
-        
     except Exception as e:
         logger.error(f"Error in premium callback: {e}")
         await query.edit_message_text("❌ Error loading premium info")

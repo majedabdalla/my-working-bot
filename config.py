@@ -1,49 +1,47 @@
+"""
+Configuration file for MultiLangTranslator Bot
+"""
+
 import os
+from typing import List
 
-# Bot configuration
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "8199168632:AAECMyWkDmLJdryMhwRNYvAPRvq5DNyBuio")
-ADMIN_ID = int(os.environ.get("ADMIN_ID", "1341868920"))
-TARGET_GROUP_ID = int(os.environ.get("TARGET_GROUP_ID", "-1002586522122"))
+# Bot Configuration
+BOT_TOKEN = os.getenv('BOT_TOKEN')
+BOT_USERNAME = os.getenv('BOT_USERNAME', 'MultiLangTranslatorBot')
 
-# Payment Details
-PAYEER_ACCOUNT = os.environ.get("PAYEER_ACCOUNT", "p1060900640")
-BITCOIN_ADDRESS = os.environ.get("BITCOIN_ADDRESS", "14qaZcSda7az1i9FFXp92vgpj9gj4wrK8z")
-
-# Supported Languages
-SUPPORTED_LANGUAGES = {
-    "en": "English",
-    "ar": "العربية",
-    "hi": "हिन्दी",
-    "id": "Bahasa Indonesia"
-}
-
-# Default language for new users
+# Language Configuration
 DEFAULT_LANGUAGE = "en"
+SUPPORTED_LANGUAGES = ["en", "ar", "hi", "id"]
 
-# File paths
-USER_DATA_FILE = "data/user_data.json"
-PENDING_PAYMENTS_FILE = "data/pending_payments.json"
-REGIONS_COUNTRIES_FILE = "data/regions_countries.json"
-LOCALES_DIR = "attached_assets"
+# Admin Configuration
+ADMIN_IDS = [
+    int(x.strip()) for x in os.getenv('ADMIN_IDS', '').split(',') 
+    if x.strip().isdigit()
+]
 
-# Conversation states
-# Profile creation
-SELECT_LANG = 0
-SELECT_GENDER = 1
-SELECT_REGION = 2
-SELECT_COUNTRY_IN_REGION = 3
+# Database Configuration (for future use)
+DATABASE_URL = os.getenv('DATABASE_URL')
 
-# Partner search
-SEARCH_PARTNER_LANG = 4
-SEARCH_PARTNER_GENDER = 5
-SEARCH_PARTNER_REGION = 6
-SEARCH_PARTNER_COUNTRY = 7
+# Feature Flags
+ENABLE_PREMIUM = True
+ENABLE_SEARCH = True
+ENABLE_NOTIFICATIONS = True
 
-# Payment verification
-PAYMENT_PROOF = 8
+# Rate Limiting
+MAX_MESSAGES_PER_MINUTE = 20
+MAX_SEARCHES_PER_HOUR = 10
 
-# Flask settings
-PORT = int(os.environ.get("PORT", 5000))
-SESSION_SECRET = os.environ.get("SESSION_SECRET", "multichatbot_secret_key")
-# Maintenance mode flag
-MAINTENANCE_MODE = False
+# Premium Configuration
+PREMIUM_PRICE = 5.00  # USD
+PREMIUM_DURATION_DAYS = 30
+
+# Logging Configuration
+LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
+
+# Webhook Configuration (for production)
+WEBHOOK_URL = os.getenv('WEBHOOK_URL')
+WEBHOOK_PORT = int(os.getenv('PORT', 8443))
+
+print(f"Config loaded - Bot token: {'✅ Set' if BOT_TOKEN else '❌ Missing'}")
+print(f"Admin IDs: {ADMIN_IDS}")
+print(f"Default language: {DEFAULT_LANGUAGE}")
