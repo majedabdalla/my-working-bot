@@ -5,7 +5,7 @@ Data handler module for MultiLangTranslator Bot
 import logging
 import json
 import os
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +59,7 @@ def update_user_data(user_id: str, data: Dict[str, Any]) -> bool:
         logger.error(f"Error updating user data for {user_id}: {e}")
         return False
 
-def get_all_users() -> list:
+def get_all_users() -> List[str]:
     """Get all user IDs"""
     try:
         return list(user_data_storage.keys())
@@ -75,6 +75,45 @@ def has_complete_profile(user_id: str) -> bool:
     except Exception as e:
         logger.error(f"Error checking profile completeness for {user_id}: {e}")
         return False
+
+def find_matching_users(criteria: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Find users matching the specified search criteria."""
+    all_users = user_data_storage
+    matching_users = []
+
+    for user_id, user_data in all_users.items():
+        # Skip if user is searching for themselves
+        if str(user_id) == str(criteria.get("user_id", 0)):
+            continue
+
+        match = True
+
+        # Check language match
+        if criteria.get("language") and criteria["language"] != "any":
+            if user_data.get("language") != criteria["language"]:
+                match = False
+
+        # Check gender match
+        if criteria.get("gender") and criteria["gender"] != "any":
+            if user_data.get("gender") != criteria["gender"]:
+                match = False
+
+        # Check country match
+        if criteria.get("country") and criteria["country"] != "any":
+            if user_data.get("country") != criteria["country"]:
+                match = False
+
+        if match:
+            matching_users.append({
+                "user_id": user_id,
+                "name": user_data.get("name", "Unknown"),
+                "language": user_data.get("language", "Unknown"),
+                "gender": user_data.get("gender", "Unknown"),
+                "country": user_data.get("country", "Unknown"),
+                "username": user_data.get("username", None)
+            })
+
+    return matching_users
 
 def save_user_data_to_file():
     """Save user data to file (backup)"""

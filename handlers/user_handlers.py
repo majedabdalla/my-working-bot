@@ -6,6 +6,7 @@ import logging
 from telegram.ext import CommandHandler, MessageHandler, filters, CallbackQueryHandler
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import CallbackContext
+from telegram.constants import ParseMode
 
 logger = logging.getLogger(__name__)
 
@@ -48,72 +49,55 @@ def create_inline_menu(user_id: str):
     ]
     return InlineKeyboardMarkup(keyboard)
 
-async def start(update: Update, context: CallbackContext):
-    """Handle /start command - ASYNC"""
-    try:
-        user = update.effective_user
-        user_id = str(user.id)
-        
-        # Get or create user data
-        user_data = get_user_data(user_id)
-        if not user_data:
-            user_data = {
-                "user_id": user_id,
-                "name": user.first_name,
-                "username": user.username,
-                "language": user.language_code or "en",
-                "profile_complete": False,
-                "premium": False,
-                "blocked": False
-            }
-            update_user_data(user_id, user_data)
-        
-        welcome_text = get_text(user_id, "welcome", name=user.first_name)
-        
-        # Send welcome message with menu
-        await update.message.reply_text(
-            welcome_text,
-            reply_markup=create_main_menu_keyboard(user_id)
-        )
-        
-        # Also send inline menu
-        menu_text = get_text(user_id, "main_menu")
-        await update.message.reply_text(
-            menu_text,
-            reply_markup=create_inline_menu(user_id)
-        )
-        
-    except Exception as e:
-        logger.error(f"Error in start command for user {user.id}: {e}")
-        try:
-            await update.message.reply_text("An error occurred. Please try again.")
-        except:
-            pass
+async def start_command(update: Update, context: CallbackContext):
+    """Handle /start command"""
+    user = update.effective_user
+    user_id = str(user.id)
+    
+    # Update user data
+    user_data = {
+        "user_id": user_id,
+        "name": user.first_name,
+        "username": user.username,
+        "language": "en",  # Default language
+        "profile_complete": False,
+        "last_active": "now"
+    }
+    update_user_data(user_id, user_data)
+    
+    # Send welcome message
+    welcome_text = get_text(user_id, "welcome", name=user.first_name)
+    
+    await update.message.reply_text(
+        welcome_text,
+        reply_markup=create_main_menu_keyboard(user_id),
+        parse_mode=ParseMode.HTML
+    )
 
 async def menu_command(update: Update, context: CallbackContext):
-    """Handle /menu command - ASYNC"""
-    try:
-        user_id = str(update.effective_user.id)
-        menu_text = get_text(user_id, "main_menu")
-        
-        await update.message.reply_text(
-            menu_text,
-            reply_markup=create_inline_menu(user_id)
-        )
-        
-    except Exception as e:
-        logger.error(f"Error in menu command: {e}")
+    """Handle /menu command"""
+    user = update.effective_user
+    user_id = str(user.id)
+    
+    menu_text = get_text(user_id, "main_menu")
+    
+    await update.message.reply_text(
+        menu_text,
+        reply_markup=create_inline_menu(user_id),
+        parse_mode=ParseMode.HTML
+    )
 
 async def help_command(update: Update, context: CallbackContext):
-    """Handle /help command - ASYNC"""
-    try:
-        user_id = str(update.effective_user.id)
-        help_text = get_text(user_id, "help_text")
-        
-        await update.message.reply_text(help_text)
-        
-    except Exception as e:
-        logger.error(f"Error in help command: {e}")
+    """Handle /help command"""
+    user = update.effective_user
+    user_id = str(user.id)
+    
+    help_text = get_text(user_id, "help_text")
+    
+    await update.message.reply_text(
+        help_text,
+        parse_mode=ParseMode.HTML
+    )
 
 async def profile_command(update: Update, context: CallbackContext):
     """Handle /profile command - ASYNC"""
@@ -132,15 +116,49 @@ async def profile_command(update: Update, context: CallbackContext):
         logger.error(f"Error in profile command: {e}")
 
 async def search_command(update: Update, context: CallbackContext):
-    """Handle /search command - ASYNC"""
-    try:
-        user_id = str(update.effective_user.id)
-        search_text = get_text(user_id, "search_partners")
-        
-        await update.message.reply_text(search_text)
-        
-    except Exception as e:
-        logger.error(f"Error in search command: {e}")
+    """Handle /search command - find a random partner"""
+    user = update.effective_user
+    user_id = str(user.id)
+    
+    # Get all users
+    from data_handler import get_all_users
+    all_users = get_all_users()
+    
+    # Find potential partners (exclude self)
+    potential_partners = [uid for uid in all_users if uid != user_id]
+    
+    if not potential_partners:
+        await update.message.reply_text(
+            get_text(user_id, "no_partners_found", default="No partners available right now. Try again later!")
+        )
+        return
+    
+    # Select random partner
+    import random
+    partner_id = random.choice(potential_partners)
+    partner_data = get_user_data(partner_id)
+    
+    # Create contact button
+    keyboard = InlineKeyboardMarkup([ [
+        InlineKeyboardButton(
+            get_text(user_id, "contact_partner", default="📞 Contact Partner"),
+            callback_data=f"contact_{partner_id}"
+        )
+    ]])
+    
+    partner_info = get_text(
+        user_id, 
+        "partner_found",
+        default="🎉 Partner Found!\n\n👤 Name: {name}\n🌍 Language: {language}",
+        name=partner_data.get("name", "Unknown"),
+        language=partner_data.get("language", "Unknown")
+    )
+    
+    await update.message.reply_text(
+        partner_info,
+        reply_markup=keyboard,
+        parse_mode=ParseMode.HTML
+    )
 
 async def settings_command(update: Update, context: CallbackContext):
     """Handle /settings command - ASYNC"""
@@ -193,40 +211,109 @@ async def handle_text_message(update: Update, context: CallbackContext):
     except Exception as e:
         logger.error(f"Error handling text message: {e}")
 
-async def handle_callback_query(update: Update, context: CallbackContext):
-    """Handle callback queries - ASYNC"""
+async def handle_contact_callback(update: Update, context: CallbackContext):
+    """Handle contact partner callback"""
+    query = update.callback_query
+    await query.answer()
+    
+    user = update.effective_user
+    user_id = str(user.id)
+    
+    # Extract partner ID from callback data
+    partner_id = query.data.replace("contact_", "")
+    partner_data = get_user_data(partner_id)
+    
+    if not partner_data:
+        await query.edit_message_text("❌ Partner not found.")
+        return
+    
+    # Notify both users
+    contact_info = get_text(
+        user_id,
+        "contact_established",
+        default="✅ Contact established!\n\n👤 Partner: {name}\n📱 Username: @{username}",
+        name=partner_data.get("name", "Unknown"),
+        username=partner_data.get("username", "No username")
+    )
+    
+    await query.edit_message_text(contact_info, parse_mode=ParseMode.HTML)
+    
+    # Notify partner
     try:
-        query = update.callback_query
-        await query.answer()
+        partner_notification = get_text(
+            partner_id,
+            "new_contact",
+            default="🔔 New Contact!\n\n👤 {name} wants to connect with you!\n📱 Username: @{username}",
+            name=user.first_name,
+            username=user.username or "No username"
+        )
         
-        user_id = str(query.from_user.id)
-        data = query.data
-        
-        if data == "profile":
-            profile_text = get_text(user_id, "profile_info", 
-                                   name=query.from_user.first_name,
-                                   language=query.from_user.language_code or "en",
-                                   status="Active")
-            await query.edit_message_text(profile_text, reply_markup=create_inline_menu())
-            
-        elif data == "search":
-            search_text = get_text(user_id, "search_partners")
-            await query.edit_message_text(search_text, reply_markup=create_inline_menu())
-            
-        elif data == "settings":
-            settings_text = get_text(user_id, "settings_menu")
-            await query.edit_message_text(settings_text, reply_markup=create_inline_menu())
-            
-        elif data == "help":
-            help_text = get_text(user_id, "help_text")
-            await query.edit_message_text(help_text, reply_markup=create_inline_menu())
-            
-        elif data == "premium":
-            premium_text = get_text(user_id, "premium_info")
-            await query.edit_message_text(premium_text, reply_markup=create_inline_menu())
-        
+        await context.bot.send_message(
+            chat_id=partner_id,
+            text=partner_notification,
+            parse_mode=ParseMode.HTML
+        )
     except Exception as e:
-        logger.error(f"Error handling callback query: {e}")
+        logger.error(f"Failed to notify partner {partner_id}: {e}")
+
+async def handle_menu_callback(update: Update, context: CallbackContext):
+    """Handle menu button callbacks"""
+    query = update.callback_query
+    await query.answer()
+    
+    user = update.effective_user
+    user_id = str(user.id)
+    
+    callback_data = query.data
+    
+    if callback_data == "search":
+        # Trigger search functionality
+        await search_from_callback(query, user_id, context)
+    else:
+        # Handle other menu options
+        response_text = get_text(user_id, f"{callback_data}_info", default=f"{callback_data.title()} feature coming soon!")
+        await query.edit_message_text(response_text, parse_mode=ParseMode.HTML)
+
+async def search_from_callback(query, user_id: str, context: CallbackContext):
+    """Handle search from inline menu"""
+    from data_handler import get_all_users
+    all_users = get_all_users()
+    
+    # Find potential partners (exclude self)
+    potential_partners = [uid for uid in all_users if uid != user_id]
+    
+    if not potential_partners:
+        await query.edit_message_text(
+            get_text(user_id, "no_partners_found", default="No partners available right now. Try again later!")
+        )
+        return
+    
+    # Select random partner
+    import random
+    partner_id = random.choice(potential_partners)
+    partner_data = get_user_data(partner_id)
+    
+    # Create contact button
+    keyboard = InlineKeyboardMarkup([ [
+        InlineKeyboardButton(
+            get_text(user_id, "contact_partner", default="📞 Contact Partner"),
+            callback_data=f"contact_{partner_id}"
+        )
+    ]])
+    
+    partner_info = get_text(
+        user_id, 
+        "partner_found",
+        default="🎉 Partner Found!\n\n👤 Name: {name}\n🌍 Language: {language}",
+        name=partner_data.get("name", "Unknown"),
+        language=partner_data.get("language", "Unknown")
+    )
+    
+    await query.edit_message_text(
+        partner_info,
+        reply_markup=keyboard,
+        parse_mode=ParseMode.HTML
+    )
 
 async def handle_contact(update: Update, context: CallbackContext):
     """Handle contact messages - ASYNC"""
@@ -255,28 +342,15 @@ async def handle_document(update: Update, context: CallbackContext):
         logger.error(f"Error handling document: {e}")
 
 def register_user_handlers(application):
-    """Register all user handlers with the application"""
-    try:
-        # Command handlers
-        application.add_handler(CommandHandler("start", start))
-        application.add_handler(CommandHandler("menu", menu_command))
-        application.add_handler(CommandHandler("help", help_command))
-        application.add_handler(CommandHandler("profile", profile_command))
-        application.add_handler(CommandHandler("search", search_command))
-        application.add_handler(CommandHandler("settings", settings_command))
-        application.add_handler(CommandHandler("cancel", cancel_command))
-        
-        # Message handlers
-        application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_message))
-        application.add_handler(MessageHandler(filters.CONTACT, handle_contact))
-        application.add_handler(MessageHandler(filters.PHOTO, handle_photo))
-        application.add_handler(MessageHandler(filters.Document.ALL, handle_document))
-        
-        # Callback query handlers
-        application.add_handler(CallbackQueryHandler(handle_callback_query))
-        
-        logger.info("User handlers registered successfully")
-        
-    except Exception as e:
-        logger.error(f"Error registering user handlers: {e}")
-        raise
+    """Register all user handlers"""
+    # Command handlers
+    application.add_handler(CommandHandler("start", start_command))
+    application.add_handler(CommandHandler("menu", menu_command))
+    application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(CommandHandler("search", search_command))
+    
+    # Callback handlers for menu and contact
+    application.add_handler(CallbackQueryHandler(handle_menu_callback, pattern="^(profile|search|settings|help|premium)$"))
+    application.add_handler(CallbackQueryHandler(handle_contact_callback, pattern="^contact_"))
+    
+    logger.info("User handlers registered successfully")
