@@ -7,21 +7,21 @@ import logging
 import os
 from typing import Dict, Any
 import config
-
 logger = logging.getLogger(__name__)
 
 # Cache for loaded translations
 loaded_translations: Dict[str, Dict[str, str]] = {}
 
 def load_translation_file(language_code: str) -> Dict[str, str]:
-    """Load translation file for a specific language from locals folder."""
+    """Load translation file for a specific language from locales folder."""
     try:
-        # Try different possible file paths
+        # Try different possible file paths - using 'locales' as the correct folder name
         possible_paths = [
-            f"locals/{language_code}.json",
-            f"locals/{language_code.lower()}.json",
-            f"locals/{language_code.upper()}.json",
-            f"translations/{language_code}.json",  # fallback
+            f"locales/{language_code}.json",
+            f"locales/{language_code.lower()}.json",
+            f"locales/{language_code.upper()}.json",
+            f"locals/{language_code}.json",  # fallback to old name
+            f"translations/{language_code}.json",  # another fallback
             f"lang/{language_code}.json"  # another common pattern
         ]
         
@@ -32,7 +32,12 @@ def load_translation_file(language_code: str) -> Dict[str, str]:
             if os.path.exists(file_path):
                 try:
                     with open(file_path, 'r', encoding='utf-8') as f:
-                        translations = json.load(f)
+                        content = f.read().strip()
+                        if content:  # Check if file is not empty
+                            translations = json.loads(content)
+                        else:
+                            logger.warning(f"Translation file {file_path} is empty")
+                            continue
                     logger.info(f"Loaded translations for '{language_code}' from {file_path}")
                     file_loaded = True
                     break
@@ -67,7 +72,17 @@ def create_fallback_translations(language_code: str) -> Dict[str, str]:
         "profile_info": "👤 **Your Profile**\n\nName: {name}\nLanguage: {language}\nStatus: {status}",
         "search_partners": "🔍 **Find Language Partners**\n\nSearching for people to connect with...",
         "settings_menu": "⚙️ **Settings**\n\nManage your preferences here.",
-        "premium_info": "⭐ **Premium Features**\n\n• Advanced search filters\n• Unlimited connections\n• Priority matching\n• Ad-free experience"
+        "premium_info": "⭐ **Premium Features**\n\n• Advanced search filters\n• Unlimited connections\n• Priority matching\n• Ad-free experience",
+        "user_not_found": "❌ User not found",
+        "contact_request": "📞 Contact request from {name}",
+        "accept_contact": "✅ Accept",
+        "decline_contact": "❌ Decline",
+        "contact_accepted": "✅ Contact accepted by {name}",
+        "contact_declined": "❌ Contact declined by {name}",
+        "contact_request_sent": "📤 Contact request sent to {name}",
+        "contact_accepted_confirmation": "✅ You accepted contact from {name}",
+        "contact_declined_confirmation": "❌ You declined contact from {name}",
+        "no_username": "No username"
     }
 
 def get_user_language(user_id: str) -> str:
@@ -130,16 +145,16 @@ def get_text(user_id: str, key: str, lang_code: str = None, **kwargs) -> str:
 def preload_translations():
     """Preload common translations to improve performance."""
     try:
-        # Get list of available translation files
-        locals_dir = "locals"
-        if not os.path.exists(locals_dir):
-            logger.warning(f"Locals directory '{locals_dir}' not found")
+        # Get list of available translation files from locales directory
+        locales_dir = "locales"
+        if not os.path.exists(locales_dir):
+            logger.warning(f"Locales directory '{locales_dir}' not found")
             return
         
-        translation_files = [f for f in os.listdir(locals_dir) if f.endswith('.json')]
+        translation_files = [f for f in os.listdir(locales_dir) if f.endswith('.json')]
         
         if not translation_files:
-            logger.warning(f"No translation files found in '{locals_dir}'")
+            logger.warning(f"No translation files found in '{locales_dir}'")
             return
         
         languages = []
@@ -156,11 +171,11 @@ def preload_translations():
 def get_available_languages() -> list:
     """Get list of available languages."""
     try:
-        locals_dir = "locals"
-        if not os.path.exists(locals_dir):
+        locales_dir = "locales"
+        if not os.path.exists(locales_dir):
             return [config.DEFAULT_LANGUAGE]
         
-        translation_files = [f for f in os.listdir(locals_dir) if f.endswith('.json')]
+        translation_files = [f for f in os.listdir(locales_dir) if f.endswith('.json')]
         languages = [f.replace('.json', '') for f in translation_files]
         
         if not languages:
@@ -182,3 +197,6 @@ except ImportError:
 
 # Preload translations on module import
 preload_translations()
+dir("locales")
+with open("locales/en.json") as f:
+    content = f.read()

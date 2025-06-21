@@ -118,40 +118,40 @@ def main():
         application.add_error_handler(error_handler)
         
         # Register handlers with error handling
-        try:
-            from handlers.user_handlers import register_user_handlers
-            register_user_handlers(application)
-            logger.info("User handlers registered")
-        except ImportError as e:
-            logger.error(f"Failed to import user handlers: {e}")
-        
-        try:
-            from handlers.admin_handlers import register_admin_handlers
-            register_admin_handlers(application)
-            logger.info("Admin handlers registered")
-        except ImportError as e:
-            logger.error(f"Failed to import admin handlers: {e}")
-        
-        try:
-            from handlers.search_handlers import register_search_handlers
-            register_search_handlers(application)
-            logger.info("Search handlers registered")
-        except ImportError as e:
-            logger.error(f"Failed to import search handlers: {e}")
-        
-        try:
-            from handlers.payment_handlers import register_payment_handlers
-            register_payment_handlers(application)
-            logger.info("Payment handlers registered")
-        except ImportError as e:
-            logger.error(f"Failed to import payment handlers: {e}")
-        
-        try:
-            from handlers.menu_handlers import register_menu_handlers
-            register_menu_handlers(application)
-            logger.info("Menu handlers registered")
-        except ImportError as e:
-            logger.error(f"Failed to import menu handlers: {e}")
+        def register_handlers(application):
+            """Register all handlers with the application"""
+            try:
+                # Register user handlers
+                from handlers.user_handlers import register_user_handlers
+                register_user_handlers(application)
+                logger.info("User handlers registered")
+                
+                # Register callback handlers for inline menus
+                from handlers.callback_handlers import register_callback_handlers
+                register_callback_handlers(application)
+                logger.info("Callback handlers registered")
+                
+                # Register admin handlers
+                from handlers.admin_handlers import register_admin_handlers
+                register_admin_handlers(application)
+                logger.info("Admin handlers registered")
+                
+                # Register search handlers
+                from handlers.search_handlers import register_search_handlers
+                register_search_handlers(application)
+                logger.info("Search handlers registered")
+                
+                # Register payment handlers
+                from handlers.payment_handlers import register_payment_handlers
+                register_payment_handlers(application)
+                logger.info("Payment handlers registered")
+                
+                # Register menu handlers
+                from handlers.menu_handlers import register_menu_handlers
+                register_menu_handlers(application)
+                logger.info("Menu handlers registered")
+            except ImportError as e:
+                logger.error(f"Failed to import handlers: {e}")
         
         # Wait a bit before starting to ensure any previous instance has stopped
         logger.info("Waiting 5 seconds before starting bot...")
