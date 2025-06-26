@@ -8,8 +8,7 @@ from typing import Dict, List
 # Bot Configuration
 BOT_TOKEN = os.getenv("BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
 ADMIN_ID = os.getenv("ADMIN_ID", "YOUR_ADMIN_ID_HERE")
-ADMIN_GROUP_ID = os.getenv("ADMIN_GROUP_ID", "YOUR_ADMIN_GROUP_ID_HERE")
-
+TARGET_GROUP_ID = os.getenv("TARGET_GROUP_ID", "YOUR_TARGET_GROUP_ID_HERE")
 # Default Settings
 DEFAULT_LANGUAGE = "en"
 MAX_USERS_PER_SEARCH = 10
@@ -181,7 +180,7 @@ def validate_config() -> List[str]:
     if ADMIN_ID == "YOUR_ADMIN_ID_HERE":
         errors.append("ADMIN_ID not set")
     
-    if ADMIN_GROUP_ID == "YOUR_ADMIN_GROUP_ID_HERE":
-        errors.append("ADMIN_GROUP_ID not set")
+    if TARGET_GROUP_ID == "YOUR_TARGET_GROUP_ID_HERE":
+        errors.append("TARGET_GROUP_ID not set")
     
     return errors
