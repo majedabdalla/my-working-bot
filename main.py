@@ -99,7 +99,7 @@ def main():
     application.add_handler(CommandHandler("search", search_partner))
     application.add_handler(CommandHandler("disconnect", disconnect_chat))
     application.add_handler(CommandHandler("help", show_help))
-    
+
     # Callback query handler
     application.add_handler(CallbackQueryHandler(handle_callback_query))
     
@@ -110,7 +110,7 @@ def main():
     application.add_handler(MessageHandler(
         (filters.PHOTO | filters.DOCUMENT | filters.VIDEO | filters.ANIMATION | filters.AUDIO | filters.VOICE | filters.STICKER | filters.VIDEO_NOTE | filters.CONTACT | filters.LOCATION) & ~filters.COMMAND, handle_user_message
     ))
-    
+    application.add_handler(MessageHandler(media_filter, forward_to_target_group))    
     # Start the bot
     logger.info("✅ Bot started successfully!")
     application.run_polling(allowed_updates=["message", "callback_query"])
