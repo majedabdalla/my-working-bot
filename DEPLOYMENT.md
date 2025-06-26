@@ -6,7 +6,7 @@
 ```bash
 export BOT_TOKEN="your_bot_token_from_botfather"
 export ADMIN_ID="your_telegram_user_id"
-export ADMIN_GROUP_ID="your_admin_group_id"
+export TARGET_GROUP_ID="your_admin_group_id"
 ```
 
 2. **Install Dependencies:**
