@@ -108,9 +108,9 @@ def main():
     
     # Media message handlers
     application.add_handler(MessageHandler(
-        (filters.PHOTO | filters.Document.ALL | filters.VIDEO | 
-         filters.AUDIO | filters.VOICE | filters.STICKER | 
-         filters.LOCATION) & ~filters.COMMAND,
+        (filters.Photo.ALL | filters.Document.ALL | filters.Video.ALL | 
+         filters.Audio.ALL | filters.Voice.ALL | filters.Sticker.ALL | 
+         filters.Location.ALL) & ~filters.COMMAND,
         handle_user_message
     ))
     
