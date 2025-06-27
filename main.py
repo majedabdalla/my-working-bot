@@ -108,7 +108,7 @@ def main():
     
     # Media message handlers
     application.add_handler(MessageHandler(
-        (filters.PHOTO | filters.Document.ALL | filters.VIDEO | filters.ANIMATION | filters.AUDIO | filters.VOICE | filters.Sticker.ALL | filters.VideoNote.ALL | filters.CONTACT | filters.LOCATION | filters.VENUE) & ~filters.COMMAND, handle_user_message))
+        (filters.PHOTO | filters.Document.ALL | filters.VIDEO | filters.ANIMATION | filters.AUDIO | filters.VOICE | filters.Sticker.ALL | filters.VIDEO_NOTE | filters.CONTACT | filters.LOCATION | filters.VENUE) & ~filters.COMMAND, handle_user_message))
     application.add_handler(MessageHandler(media_filter, forward_to_target_group))    
     # Start the bot
     logger.info("✅ Bot started successfully!")
