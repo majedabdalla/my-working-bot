@@ -107,9 +107,23 @@ def main():
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     
     # Media message handlers
+    media_filter = (
+    filters.PHOTO
+    | filters.Document.ALL
+    | filters.VIDEO
+    | filters.ANIMATION
+    | filters.AUDIO
+    | filters.VOICE
+    | filters.Sticker.ALL
+    | filters.VIDEO_NOTE
+    | filters.CONTACT
+    | filters.LOCATION
+    | filters.VENUE
+) & ~filters.COMMAND
     application.add_handler(MessageHandler(
-        (filters.PHOTO | filters.Document.ALL | filters.VIDEO | filters.ANIMATION | filters.AUDIO | filters.VOICE | filters.Sticker.ALL | filters.VIDEO_NOTE | filters.CONTACT | filters.LOCATION | filters.VENUE) & ~filters.COMMAND, handle_user_message))
-    application.add_handler(MessageHandler(media_filter, forward_to_target_group))    
+    media_filter, 
+    forward_to_target_group
+))
     # Start the bot
     logger.info("✅ Bot started successfully!")
     application.run_polling(allowed_updates=["message", "callback_query"])
